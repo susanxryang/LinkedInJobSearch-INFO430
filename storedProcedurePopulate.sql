@@ -378,7 +378,13 @@ ELSE
    COMMIT TRANSACTION T1
 GO
 
-CREATE PROCEDURE [dbo].[wrapperEmployer]
+
+-- DBCC CHECKIDENT(tblEmployer, RESEED, 1)
+-- GO
+-- DELETE FROM tblEmployer WHERE EmployerID != 1
+-- select * from tblEmployer
+
+ALTER PROCEDURE [dbo].[wrapperEmployer]
 AS
 DECLARE @EName varchar(50),
 @EDescr varchar(200),
@@ -393,7 +399,6 @@ BEGIN
     SET @RANDLoc = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblLocation) + 1 AS INT), 3))
     SET @RANDEmpSize = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblEmployerSize) + 1 AS INT), 3))
     SET @RANDInd = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblIndustry) + 1 AS INT), 3))
-    -- SET @RANDBus = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM PEEPS.dbo.Businesses) + 1 AS INT), 3))
     SET @EName = (SELECT BusinessName FROM PEEPS.dbo.Businesses WHERE BusinessID = @RUN)
     SET @EDescr = (SELECT Email FROM PEEPS.dbo.Businesses WHERE BusinessID = @RUN)
     SET @CiName = (SELECT City FROM tblLocation WHERE LocationID = @RANDLoc)
@@ -422,6 +427,7 @@ BEGIN
 SELECT COUNT(*) FROM tblEmployer
 EXEC [wrapperEmployer]
 SELECT * FROM tblEmployer
+GO
 
 
 -- Procedure for inserting specific rows into JobStatus
@@ -507,7 +513,7 @@ WHILE @RUN > 0
 	BEGIN
 
 		SET @Job_ID = @RUN
-		SET @Status_ID = (SELECT FLOOR(RAND() * (8-(5+1))+5)) -- Select random StatusID (1 (Open) or 2 (Closed))
+		SET @Status_ID = (SELECT FLOOR(RAND() * 3)+1) -- Select random StatusID (1 (Open) or 2 (Closed))
 		SET @Start_Date = (SELECT GETDATE() - RAND()*1000)
 		SET @End_Date =  (SELECT DATEADD(DAY, 14, @Start_Date))
 

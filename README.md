@@ -1,28 +1,28 @@
 # LinkedInJobSearch-INFO430
 Tables:
 - [x] UserType (regular vs influencer)
-- [ ] Gender
+- [x] Gender
 - [x] MemebershipType
-- [ ] Membership (GetID)
-- [ ] User
+- [ ] Membership (Jason)
+- [ ] User (Jason)
 
 - [x] UserSeekingStatus
-- [ ] JobStatus
+- [ ] JobStatus (Jerray)
 - [x] SeekingStatus
 - [x] Status (ONLY job status(active, closed)!!)
-- [ ] UserJob
+- [ ] UserJob (Jerray)
 
 - [x] Role (recruiter vs applicant)
-- [ ] Job
-- [ ] Employer
+- [ ] Job (Susan)
+- [x] Employer (Susan)
 - [x] EmployerSize
 - [x] Industry
 
-- [ ] Location
-- [ ] JobLocation
-- [ ] JobType (part-time, full-time, contract/seasonal, internship, apprenticeship)
-- [ ] Level (Junior, Mid-level, Senior, Exec)
-- [ ] Position
+- [ ] Location (Jacob)
+- [ ] JobLocation (Jacob)
+- [x] JobType (part-time, full-time, contract/seasonal, internship, apprenticeship)
+- [x] Level (Junior, Mid-level, Senior, Exec)
+- [x] Position
 
 
 

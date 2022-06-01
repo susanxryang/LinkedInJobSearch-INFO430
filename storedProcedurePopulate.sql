@@ -267,20 +267,16 @@ ALTER PROCEDURE [dbo].[wrapperMembership]
 AS
 DECLARE @Stary VARCHAR(50), @Eny VARCHAR(50), @Fna VARCHAR(50), @Lna VARCHAR(50),
 @Dobb DATE, @MembTypee VARCHAR(100), @RUN INT, @RANDUser FLOAT, @RANDMemType FLOAT
-SET @RUN = 5 -- (SELECT COUNT(*) FROM tblUser)
+SET @RUN = 1 -- (SELECT COUNT(*) FROM tblUser)
 WHILE @RUN > 0
 BEGIN
 SET @RANDUser = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT), 3))
 SET @RANDMemType = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
--- PRINT(select * from tblUser where UserID = @RANDUser)
 SET @Fna = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
-PRINT(@Fna)
 SET @Lna = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
-PRINT(@Lna)
 SET @Stary = (SELECT GETDATE() - RAND()*1000)
 SET @Eny = (SELECT DATEADD(D, 14, @Stary)) -- (SELECT GETDATE() - RAND()*100)
 SET @Dobb = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
-PRINT(@Dobb)
 SET @MembTypee = (SELECT MembershipTypeName FROM tblMembershipType WHERE MembershipTypeID = @RANDMemType)
 IF @Fna IS NULL OR @Lna  IS NULL OR @Stary IS NULL
    OR @Eny IS NULL OR @Dobb IS NULL OR @MembTypee IS NULL
@@ -305,9 +301,6 @@ SELECT * FROM tblMembership
 EXEC [wrapperMembership]
 SELECT COUNT(*) FROM tblMembership
 GO
-select * from tblUser WHERE UserFname = 'Robby' and UserLname = 'Colarossi'
-Colarossi
-1987-11-16
 
 --  Jacob Code, Populating JobStatus 
 
@@ -390,8 +383,7 @@ ELSE
    COMMIT TRANSACTION T1
 GO
 
-
--- DBCC CHECKIDENT(tblEmployer, RESEED, 1)
+-- DBCC CHECKIDENT(tblUser, RESEED, 0)
 -- GO
 -- DELETE FROM tblEmployer WHERE EmployerID != 1
 -- select * from tblEmployer

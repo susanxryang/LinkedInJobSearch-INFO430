@@ -1,5 +1,8 @@
 USE INFO430_Proj_08
 GO
+
+-- ALTER TABLE tblJob DROP COLUMN NumberOfApplicants
+-- GO
 /*
 Business Rule: Influencer can only apply to jobs with the level executive
  */

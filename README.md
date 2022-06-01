@@ -4,7 +4,7 @@ Tables:
 - [x] Gender
 - [x] MemebershipType
 - [ ] Membership (Jason)
-- [ ] User (Jason)
+- [x] User (Jason)
 
 - [x] UserSeekingStatus
 - [x] JobStatus (Jerray)
@@ -13,7 +13,7 @@ Tables:
 - [x] UserJob (Jerray)
 
 - [x] Role (recruiter vs applicant)
-- [ ] Job (Susan)
+- [x] Job (Susan)
 - [x] Employer (Susan)
 - [x] EmployerSize
 - [x] Industry
@@ -36,10 +36,10 @@ Business rules: (check assignments in google doc: https://docs.google.com/docume
 - [x] Any job higher than mid level cannot be part-time or intern or apprenticeship
 - [x] One user cannot apply to same job twice (user job)
 - [x] One user cannot be both recruiter and applicant for one job (user job)
-- [ ] One cannot apply to closed jobs (job)
+- [x] One cannot apply to closed jobs (job)
 - [ ] Exec position must have salary > 200k
 - [ ] All employers must have at least 1 US location
-- [ ] All US positions has salary > 16k
+- [x] All US software engineer positions has salary > 80k
 
 
 Computed columns: (check assignments in google doc)
@@ -50,5 +50,5 @@ Computed columns: (check assignments in google doc)
 - [x] Number of postings for each job level
 - [x] Total number of jobs with each job status
 - [x] Number of current subscribed members
-- [ ] Number of female vs male applicant for a job
-- [ ] Number of female vs male applicant for an industry
+- [x] Number of female vs male applicant for a job
+- [x] Number of female vs male applicant for an industry

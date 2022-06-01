@@ -240,3 +240,120 @@ GO
 ALTER TABLE tblJob
 ADD Total_Male_Apps AS (dbo.xuanry_fn_total_fm_app_job(JobID))
 GO
+
+-- Jason business rules
+-- 1) Age <18 cannot apply to jobs -- cannot run after change
+GO
+ALTER FUNCTION ageUnder18noJob()
+RETURNS INTEGER
+AS
+BEGIN
+
+DECLARE @RET INT = 0
+    IF EXISTS(
+        SELECT * FROM tblUSER U
+            JOIN tblUserJob UJ ON U.UserID = UJ.UserID
+            JOIN tblJOB J ON UJ.JobID = J.JobID
+            JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        WHERE U.UserDOB < DateADD(Year, -18, GETDATE())
+            AND JT.JobTypeName = 'Full-time' OR JT.JobTypeName ='Part-time' 
+            OR JT.JobTypeName = 'Contract' OR JT.JobTypeName = 'Seasonal'
+        )
+    SET @RET = 1
+    RETURN @RET
+END
+GO
+
+ALTER TABLE tblJob WITH NOCHECK
+ADD CONSTRAINT SorryTooYoung18job
+CHECK (dbo.ageUnder18noJob() = 0)
+GO
+
+-- 2) no one over age 24 can apply to internships
+CREATE FUNCTION ageOver24noInternshipUhh()
+RETURNS INTEGER
+AS
+BEGIN 
+
+DECLARE @RET INT = 0
+    IF EXISTS(
+        SELECT * FROM tblUSER U
+            JOIN tblUserJob UJ ON U.UserID = UJ.UserID
+            JOIN tblJOB J ON UJ.JobID = J.JobID
+            JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        WHERE U.UserDOB < DateADD(Year, -18, GETDATE())
+            AND JT.JobTypeName = 'Full-time' OR JT.JobTypeName ='Part-time' 
+            OR JT.JobTypeName = 'Contract' OR JT.JobTypeName = 'Seasonal'
+        )
+    SET @RET = 1
+    RETURN @RET
+END
+GO
+
+ALTER TABLE tblJOB WITH NOCHECK
+ADD CONSTRAINT ageOver24noInternshipPLEASE
+CHECK (dbo.ageOver24noInternshipUhh() = 0) 
+GO
+
+-- Jason Computed Columns
+-- 1) Number of applicants for each job
+ALTER FUNCTION numApplicantsPerJob(@PK INT)
+RETURNS INT
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblUserJob UJ
+    WHERE UJ.JobID = @PK
+    )
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblJob
+ADD TotalNumApplicantsPerJob AS 
+(dbo.numApplicantsPerJob(JobID)) -- not dbo.
+
+
+-- 2) Number of applicants each company
+GO
+CREATE FUNCTION numApplicantsPerCompany(@PK INT)
+RETURNS INT
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblUserJob UJ
+        JOIN tblJob J ON UJ.JobID = J.JobID
+        JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+    WHERE E.EmployerID = @PK
+    )
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblEmployer
+ADD TotalNumApplicantsPerCompany AS 
+(dbo.numApplicantsPerCompany(EmployerID)) -- not dbo.
+
+-- 3) Number of internship positions per company
+GO
+CREATE FUNCTION numInternshipsByCompany(@PK INT)
+RETURNS INT
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblJob J 
+        JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+    WHERE JT.JobTypeName = 'Internship'
+    AND E.EmployerID = @PK
+    )
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblEmployer
+ADD TotalNumInternshipsPerCompany AS 
+(dbo.numInternshipsByCompany(EmployerID)) -- not dbo.

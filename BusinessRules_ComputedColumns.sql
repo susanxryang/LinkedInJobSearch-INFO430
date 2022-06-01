@@ -30,6 +30,32 @@ CHECK (dbo.strozj_influencer_only_exec() = 0)
 GO
 
 /*
+Business Rule: Users cannot add a premium membership within 3 months of their last membership expiring
+ */
+
+CREATE FUNCTION strozj_membership_3month_restriction()
+RETURNS INTEGER
+AS
+BEGIN
+
+DECLARE @RET INT = 0
+    IF EXISTS(
+		SELECT * FROM tblMembership M
+			JOIN tblMembershipType MT ON M.MembershipTypeID = MT.MembershipTypeID
+		WHERE DATEDIFF(MONTH, M.EndDate, GETDATE()) < 3 AND MT.MembershipTypeName = 'Premium'
+        )
+    SET @RET = 1
+    RETURN @RET
+END
+GO
+
+ALTER TABLE tblMembership WITH NOCHECK
+ADD CONSTRAINT User_Membership_3month_Premium_Restriction
+CHECK (dbo.strozj_membership_3month_restriction() = 0)
+
+GO
+
+/*
 Business Rule: Age < 30 cannot apply to senior level positions
  */
 

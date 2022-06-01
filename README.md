@@ -10,7 +10,7 @@ Tables:
 - [x] JobStatus (Jerray)
 - [x] SeekingStatus
 - [x] Status (ONLY job status(active, closed)!!)
-- [x] UserJob (Jerray)
+- [ ] UserJob (Jerray)
 
 - [x] Role (recruiter vs applicant)
 - [x] Job (Susan)
@@ -49,6 +49,6 @@ Computed columns: (check assignments in google doc)
 - [x] Number of postings for each company
 - [x] Number of postings for each job level
 - [x] Total number of jobs with each job status
-- [x] Number of current subscribed members
+- [x] Number of members for each membership type
 - [x] Number of female vs male applicant for a job
 - [x] Number of female vs male applicant for an industry

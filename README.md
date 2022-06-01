@@ -7,10 +7,10 @@ Tables:
 - [ ] User (Jason)
 
 - [x] UserSeekingStatus
-- [ ] JobStatus (Jerray)
+- [x] JobStatus (Jerray)
 - [x] SeekingStatus
 - [x] Status (ONLY job status(active, closed)!!)
-- [ ] UserJob (Jerray)
+- [x] UserJob (Jerray)
 
 - [x] Role (recruiter vs applicant)
 - [ ] Job (Susan)
@@ -33,9 +33,9 @@ Business rules: (check assignments in google doc: https://docs.google.com/docume
 - [ ] Age <18 cannot apply to jobs
 - [ ] Cannot apply to jobs during national holiday Christmas (job status)
 - [ ] Age >24 cannot apply to internships
-- [ ] Any job higher than mid level cannot be part-time or intern or apprenticeship
-- [ ] One user cannot apply to same job twice (user job)
-- [ ] One user cannot be both recruiter and applicant for one job (user job)
+- [x] Any job higher than mid level cannot be part-time or intern or apprenticeship
+- [x] One user cannot apply to same job twice (user job)
+- [x] One user cannot be both recruiter and applicant for one job (user job)
 - [ ] One cannot apply to closed jobs (job)
 - [ ] Exec position must have salary > 200k
 - [ ] All employers must have at least 1 US location
@@ -48,7 +48,7 @@ Computed columns: (check assignments in google doc)
 - [ ] Number of internship positions at different time of year
 - [x] Number of postings for each company
 - [x] Number of postings for each job level
-- [ ] Total number of jobs with each job status
-- [ ] Number of current subscribed members
+- [x] Total number of jobs with each job status
+- [x] Number of current subscribed members
 - [ ] Number of female vs male applicant for a job
 - [ ] Number of female vs male applicant for an industry

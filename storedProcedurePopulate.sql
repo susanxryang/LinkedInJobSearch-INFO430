@@ -77,9 +77,9 @@ GO
 -- Synthetic Tnx --
 -- USE INFO430_Proj_08
  
-INSERT INTO tblUser (UserFname, UserLname, UserDOB)
-SELECT CustomerFname, CustomerLname, DateOfBirth FROM PEEPS.dbo.tblCUSTOMER
-select TOP 3 * FROM tblUser
+-- INSERT INTO tblUser (UserFname, UserLname, UserDOB)
+-- SELECT CustomerFname, CustomerLname, DateOfBirth FROM PEEPS.dbo.tblCUSTOMER
+-- select TOP 3 * FROM tblUser
  
  
 -- GetID stored procedures
@@ -176,20 +176,22 @@ GO
 ALTER PROCEDURE [dbo].[wrapperUser]
 AS
 DECLARE @Firy varchar(50), @Lasy varchar(50), @Pronnys varchar(50), @Genny varchar(50),
-@Dobenie DATE, @UTypee varchar(50), @RUN INT, @RANDUserTypeID FLOAT, @RANDGenderTypeID FLOAT,
-@RANDUserID FLOAT
-SET @RUN = (SELECT COUNT(*) FROM tblUser)
+@Dobenie DATE, @UTypee varchar(50), @RUN INT, @RANDUserTypeID INT, @RANDGenderTypeID INT,
+@RANDUserID INT
+SET @RUN = (SELECT COUNT(*) FROM PEEPS.dbo.tblCUSTOMER)
 WHILE @RUN > 0
 BEGIN
    SET @RANDUserTypeID = (SELECT LEFT(CAST(RAND() * 2 + 1 AS INT), 3))
    SET @RANDGenderTypeID = (SELECT LEFT(CAST(RAND() * 3 + 1 AS INT), 3))
-   SET @RANDUserID = (SELECT LEFT(CAST(RAND() * 1000 AS INT), 3))
-   SET @Firy = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUserID)
-   SET @Lasy = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUserID)
+   SET @RANDUserID = @RUN
+   SET @Firy = (SELECT CustomerFname FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
+   SET @Lasy = (SELECT CustomerLname FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
    SET @Pronnys = (SELECT Pronouns FROM tblGender WHERE GenderID = @RANDGenderTypeID)
    SET @Genny = (SELECT GenderName FROM tblGender WHERE GenderID = @RANDGenderTypeID)
-   SET @Dobenie = (SELECT UserDOB FROM tblUSER WHERE UserID = @RANDUserID)
+   SET @Dobenie = (SELECT DateOfBirth FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
    SET @UTypee = (SELECT UserTypeName FROM tblUserType WHERE UserTypeID = @RANDUserTypeID)
+   -- PRINT(@RANDUserTypeID + ',' + @RANDGenderTypeID  + ',' +  @RANDUserID  + ',' +  @Firy + ',' +  
+   -- @Lasy + ',' +  @Pronnys + ',' +  @Genny + ',' +  @Dobenie + ',' +  @UTypee)
    IF @Firy IS NULL OR @Lasy IS NULL OR @Pronnys IS NULL or @Genny IS NULL
    or @Dobenie IS NULL OR @UTypee IS NULL
    BEGIN
@@ -207,11 +209,12 @@ EXEC insertIntoUser
  
 SET @RUN = @RUN - 1
 END
- 
+
 -- execute insert User
 EXEC [wrapperUser] -- error b/c user has null values
 GO
- 
+-- SELECT * FROM tblUser
+
  
 -- Synthetic Tnx Membership table --
 ALTER PROCEDURE insertIntoMembership
@@ -292,7 +295,9 @@ EXEC insertIntoMembership
  
 SET @RUN = @RUN - 1
 END
-SELECT COUNT(*) FROM tblMembership
+
+SELECT COUNT(*) FROM tblUser
+SELECT * FROM tblMembership
 EXEC [wrapperMembership]
 SELECT COUNT(*) FROM tblMembership
 GO
@@ -378,8 +383,7 @@ ELSE
    COMMIT TRANSACTION T1
 GO
 
-
--- DBCC CHECKIDENT(tblEmployer, RESEED, 1)
+-- DBCC CHECKIDENT(tblUser, RESEED, 0)
 -- GO
 -- DELETE FROM tblEmployer WHERE EmployerID != 1
 -- select * from tblEmployer

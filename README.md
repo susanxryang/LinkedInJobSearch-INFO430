@@ -18,7 +18,7 @@ Tables:
 - [x] EmployerSize
 - [x] Industry
 
-- [ ] Location (Jacob)
+- [x] Location (Jacob)
 - [ ] JobLocation (Jacob)
 - [x] JobType (part-time, full-time, contract/seasonal, internship, apprenticeship)
 - [x] Level (Junior, Mid-level, Senior, Exec)
@@ -28,8 +28,8 @@ Tables:
 
 Business rules: (check assignments in google doc: https://docs.google.com/document/d/1o_oB73rdUzYbMu2MnjwLHFvSWBbpU8-GPFMmLb29F7A/edit)
 - [ ] User cannot cancel and restart membership within 3 month period (membership)
-- [ ] Influencer can only apply to exec jobs (user type)
-- [ ] Age < 30 cannot apply to senior positions (position)
+- [x] Influencer can only apply to exec jobs (user type)
+- [x] Age < 30 cannot apply to senior positions (position)
 - [ ] Age <18 cannot apply to jobs
 - [ ] Cannot apply to jobs during national holiday Christmas (job status)
 - [ ] Age >24 cannot apply to internships
@@ -46,8 +46,8 @@ Computed columns: (check assignments in google doc)
 - [ ] Number of applicants for each job
 - [ ] Number of applicants for each company
 - [ ] Number of internship positions at different time of year
-- [ ] Number of postings for each company
-- [ ] Number of postings for each job level
+- [x] Number of postings for each company
+- [x] Number of postings for each job level
 - [ ] Total number of jobs with each job status
 - [ ] Number of current subscribed members
 - [ ] Number of female vs male applicant for a job

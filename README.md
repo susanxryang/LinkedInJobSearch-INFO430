@@ -10,7 +10,7 @@ Tables:
 - [x] JobStatus (Jerray)
 - [x] SeekingStatus
 - [x] Status (ONLY job status(active, closed)!!)
-- [ ] UserJob (Jerray)
+- [x] UserJob (Jerray)
 
 - [x] Role (recruiter vs applicant)
 - [x] Job (Susan)

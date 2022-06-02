@@ -240,3 +240,217 @@ GO
 ALTER TABLE tblJob
 ADD Total_Male_Apps AS (dbo.xuanry_fn_total_fm_app_job(JobID))
 GO
+
+-- Jason business rules
+-- 1) Age <18 cannot apply to jobs -- cannot run after change
+GO
+ALTER FUNCTION ageUnder18noJob()
+RETURNS INTEGER
+AS
+BEGIN
+
+DECLARE @RET INT = 0
+    IF EXISTS(
+        SELECT * FROM tblUSER U
+            JOIN tblUserJob UJ ON U.UserID = UJ.UserID
+            JOIN tblJOB J ON UJ.JobID = J.JobID
+            JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        WHERE U.UserDOB < DateADD(Year, -18, GETDATE())
+            AND JT.JobTypeName = 'Full-time' OR JT.JobTypeName ='Part-time' 
+            OR JT.JobTypeName = 'Contract' OR JT.JobTypeName = 'Seasonal'
+        )
+    SET @RET = 1
+    RETURN @RET
+END
+GO
+
+ALTER TABLE tblJob WITH NOCHECK
+ADD CONSTRAINT SorryTooYoung18job
+CHECK (dbo.ageUnder18noJob() = 0)
+GO
+
+-- 2) no one over age 24 can apply to internships
+CREATE FUNCTION ageOver24noInternshipUhh()
+RETURNS INTEGER
+AS
+BEGIN 
+
+DECLARE @RET INT = 0
+    IF EXISTS(
+        SELECT * FROM tblUSER U
+            JOIN tblUserJob UJ ON U.UserID = UJ.UserID
+            JOIN tblJOB J ON UJ.JobID = J.JobID
+            JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        WHERE U.UserDOB < DateADD(Year, -18, GETDATE())
+            AND JT.JobTypeName = 'Full-time' OR JT.JobTypeName ='Part-time' 
+            OR JT.JobTypeName = 'Contract' OR JT.JobTypeName = 'Seasonal'
+        )
+    SET @RET = 1
+    RETURN @RET
+END
+GO
+
+ALTER TABLE tblJOB WITH NOCHECK
+ADD CONSTRAINT ageOver24noInternshipPLEASE
+CHECK (dbo.ageOver24noInternshipUhh() = 0) 
+GO
+
+-- Jason Computed Columns
+-- 1) Number of applicants for each job
+ALTER FUNCTION numApplicantsPerJob(@PK INT)
+RETURNS INT
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblUserJob UJ
+    WHERE UJ.JobID = @PK
+    )
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblJob
+ADD TotalNumApplicantsPerJob AS 
+(dbo.numApplicantsPerJob(JobID)) -- not dbo.
+
+
+-- 2) Number of applicants each company
+GO
+CREATE FUNCTION numApplicantsPerCompany(@PK INT)
+RETURNS INT
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblUserJob UJ
+        JOIN tblJob J ON UJ.JobID = J.JobID
+        JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+    WHERE E.EmployerID = @PK
+    )
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblEmployer
+ADD TotalNumApplicantsPerCompany AS 
+(dbo.numApplicantsPerCompany(EmployerID)) -- not dbo.
+
+-- 3) Number of internship positions per company
+GO
+CREATE FUNCTION numInternshipsByCompany(@PK INT)
+RETURNS INT
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblJob J 
+        JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+    WHERE JT.JobTypeName = 'Internship'
+    AND E.EmployerID = @PK
+    )
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblEmployer
+ADD TotalNumInternshipsPerCompany AS 
+(dbo.numInternshipsByCompany(EmployerID)) -- not dbo.
+
+
+-- Business Rules
+-- 1. Any job higher than mid level cannot be part-time or intern or apprenticeship
+CREATE FUNCTION no_partTime_mid_level_higher()
+RETURNS INTEGER
+AS
+BEGIN
+
+DECLARE @RET INT = 0
+    IF EXISTS(
+		SELECT * FROM tblJob J
+			JOIN tblLevel L ON J.LevelID = L.LevelID
+            JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+		WHERE L.LevelID > 4 
+        AND JT.JobTypeName = 'Internship' OR JT.JobTypeName = 'Part-time' OR JT.JobTypeName = 'Apprenticeship'
+        )
+    SET @RET = 1
+    RETURN @RET
+END
+GO
+
+ALTER TABLE tblJob WITH NOCHECK
+ADD CONSTRAINT Mid_Level_Higher_JobType_Restriction
+CHECK (dbo.no_partTime_mid_level_higher() = 0)
+GO
+
+-- 2. One user cannot apply to same job twice (user job)
+
+
+ALTER TABLE tblUserJob ADD CONSTRAINT no_duplicate_application UNIQUE (UserID, JobID);
+GO
+
+-- 3. One user cannot be both recruiter and applicant for one job (user job)
+CREATE FUNCTION cannot_both_recruiter_applicant()
+RETURNS INTEGER
+AS
+BEGIN
+
+DECLARE @RET INT = 0
+    IF EXISTS(
+		SELECT UserID, JobID, SUM(RoleID) FROM tblUserJob UJ
+        GROUP BY UserID, JobID
+        HAVING SUM(RoleID) >= 3
+        )
+    SET @RET = 1
+    RETURN @RET
+END
+GO
+
+ALTER TABLE tblUserJob WITH NOCHECK
+ADD CONSTRAINT Both_Recruiter_Applicant_Restriction
+CHECK (dbo.cannot_both_recruiter_applicant() = 0)
+GO
+
+
+-- Computed Columns
+-- 1. Total number of jobs with each job status
+CREATE FUNCTION total_jobsNumber_each_jobStatus(@PK INT)
+RETURNS INTEGER
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblJob J
+        JOIN tblJobStatus JS ON J.JobID = JS.JobID
+        JOIN tblStatus S ON JS.StatusID = S.StatusID
+        WHERE S.StatusID = @PK
+)
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblStatus
+ADD TotalNumberEachJobStatus AS (dbo.total_jobsNumber_each_jobStatus(StatusID))
+GO
+
+
+-- 2. Number of members for each membership type
+CREATE FUNCTION members_each_type(@PK INT)
+RETURNS INTEGER
+AS
+BEGIN
+
+DECLARE @RET INT = (
+    SELECT COUNT(*) FROM tblMembership M
+        JOIN tblMembershipType MT ON M.MembershipTypeID = MT.MembershipTypeID
+        WHERE M.MembershipTypeID = @PK
+)
+RETURN @RET
+END
+GO
+
+ALTER TABLE tblMembershipType
+ADD MembersEachType AS (dbo.members_each_type(MembershipTypeID))
+GO
+

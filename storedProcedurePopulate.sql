@@ -31,18 +31,18 @@ SET @GendID = (SELECT GenderID
 )
 GO
  
-CREATE PROCEDURE getUserID -- Ran once, works!
-@UserFNam varchar(50),
-@UserLnam varchar(200),
-@DOBBY DATE,
-@Usy_ID INT OUTPUT
-AS
-SET @Usy_ID = (SELECT UserID
-   FROM tblUser
-   WHERE UserFname = @UserFNam
-   AND UserLname = @UserLnam
-   AND UserDOB = @DOBBY)
-GO
+-- CREATE PROCEDURE getUserID -- Ran once, works!
+-- @UserFNam varchar(50),
+-- @UserLnam varchar(200),
+-- @DOBBY DATE,
+-- @Usy_ID INT OUTPUT
+-- AS
+-- SET @Usy_ID = (SELECT UserID
+--    FROM tblUser
+--    WHERE UserFname = @UserFNam
+--    AND UserLname = @UserLnam
+--    AND UserDOB = @DOBBY)
+-- GO
  
 -- EASY stored procedures
 CREATE PROCEDURE getLocationID
@@ -242,10 +242,10 @@ EXEC getUserID
 @UserLnam = @Lnamm,
 @DOBBY = @Dobie,
 @Usy_ID = @U_ID OUTPUT
- 
+
 IF @U_ID IS NULL
-   PRINT @U_ID
   BEGIN
+      -- PRINT 'found uid to be null here'
       PRINT '@U_ID is NULL';
       THROW 55656, '@U_ID cannot be NULL; process is terminating', 1;
   END
@@ -267,11 +267,11 @@ ALTER PROCEDURE [dbo].[wrapperMembership]
 AS
 DECLARE @Stary VARCHAR(50), @Eny VARCHAR(50), @Fna VARCHAR(50), @Lna VARCHAR(50),
 @Dobb DATE, @MembTypee VARCHAR(100), @RUN INT, @RANDUser FLOAT, @RANDMemType FLOAT
-SET @RUN = 1 -- (SELECT COUNT(*) FROM tblUser)
+SET @RUN = (SELECT COUNT(*) FROM tblUser)
 WHILE @RUN > 0
 BEGIN
-SET @RANDUser = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT), 3))
-SET @RANDMemType = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
+SET @RANDUser = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT)))
+SET @RANDMemType = (SELECT FLOOR(CAST(RAND()*2 + 1 AS INT)))
 SET @Fna = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
 SET @Lna = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
 SET @Stary = (SELECT GETDATE() - RAND()*1000)
@@ -288,8 +288,8 @@ IF @Fna IS NULL OR @Lna  IS NULL OR @Stary IS NULL
 EXEC insertIntoMembership
 @Starty = @Stary,
 @Enddy = @Eny,
-@Fnamm = Fna,
-@Lnamm = Lna,
+@Fnamm = @Fna,
+@Lnamm = @Lna,
 @Dobie = @Dobb,
 @MembType = @MembTypee
  
@@ -302,6 +302,34 @@ EXEC [wrapperMembership]
 SELECT COUNT(*) FROM tblMembership
 GO
 
+<<<<<<< HEAD
+=======
+-- select * from tblUser where UserID = 4478
+--  Jacob Code, Populating JobStatus 
+
+-- Get StatusID Procedure
+CREATE PROCEDURE strozj_getStatusID
+@StatusName varchar(50),
+@S_ID INTEGER OUTPUT
+
+AS
+SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
+
+GO
+
+CREATE PROCEDURE strozj_getJobID
+@JobTypeID INT,
+@LevelID INT,
+@EmployerID INT,
+@PositionID INT,
+@J_ID INTEGER OUTPUT
+
+AS
+SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTypeID = @JobTypeID AND J.LevelID = @LevelID AND J.EmployerID = @EmployerID AND J.PositionID = @PositionID)
+
+GO
+
+>>>>>>> ea10686a32451aea207cb88fb4dcc9c916949997
 -- Synthetic Tnx to Insert into Employer --
 CREATE PROCEDURE insertIntoEmployer
 @EmpName varchar(50),
@@ -443,7 +471,7 @@ SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTypeID = @JobTypeID AND J.Lev
 GO
 
 -- Procedure for inserting specific rows into JobStatus
-CREATE PROCEDURE strozj_insertIntoJobStatus
+CREATE PROCEDURE insertIntoJobStatus
 @JobType_ID INTEGER,
 @Level_ID INTEGER,
 @Employer_ID INTEGER,
@@ -467,7 +495,7 @@ IF @Job_ID IS NULL
 		THROW 55658, 'Job_ID cannot be NULL, process terminating', 1;
 	END
 
-EXEC strozj_getStatusID
+EXEC getStatusID
 @StatusName = @Status_Name,
 @S_ID = @Status_ID OUTPUT
 
@@ -601,3 +629,257 @@ WHILE @RUN > 0
 		SET @RUN = @RUN - 1
 	END
 GO
+
+
+-- Synthetic Tnx for tblUserSeekingStatus
+
+CREATE PROCEDURE jraygetUserID
+@UFname VARCHAR(50),
+@ULname VARCHAR(50),
+@UDOB DATE,
+@Userr_ID INTEGER OUTPUT
+AS
+SET @Userr_ID = (
+    SELECT UserID
+    FROM tblUser
+    WHERE UserFname = @UFname
+    AND UserLname = @ULname
+    AND UserDOB = @UDOB)
+GO
+
+CREATE PROCEDURE getSeekingStatusID
+@SeekSName VARCHAR(50),
+@Seek_ID INTEGER OUTPUT
+AS
+SET @Seek_ID = (
+    SELECT SeekingStatusID
+    FROM tblSeekingStatus
+    WHERE @SeekSName = SeekingStatusName)
+GO
+
+ALTER PROCEDURE insertIntoUserSeekingStatus
+@Start_Date DATE,
+@End_Date DATE,
+@User_Fname VARCHAR(50),
+@User_Lname VARCHAR(50),
+@User_DOB DATE,
+@SeekStatus_Name VARCHAR(50)
+AS
+DECLARE @SS_ID INT, @User_ID INT
+
+EXEC jraygetUserID
+@UFname = @User_Fname,
+@ULname = @User_Lname,
+@UDOB = @User_DOB,
+@Userr_ID = @User_ID OUTPUT
+
+IF @User_ID IS NULL
+    BEGIN
+        PRINT '@User_ID is NULL';
+        THROW 55656, '@User_ID cannot be NULL; process is terminating', 1;
+    END
+
+EXEC getSeekingStatusID
+@SeekSName = @SeekStatus_Name,
+@Seek_ID = @SS_ID OUTPUT
+
+IF @SS_ID IS NULL
+    BEGIN
+        PRINT '@SS_ID is NULL';
+        THROW 55656, '@SS_ID cannot be NULL; process is terminating', 1;
+    END
+
+BEGIN TRANSACTION T1
+INSERT INTO tblUserSeekingStatus (StartDate, EndDate, SeekingStatusID, UserID)
+VALUES (@Start_Date, @End_Date, @SS_ID, @User_ID)
+ 
+IF @@ERROR <> 0
+   BEGIN
+       PRINT '@@ERROR is showing an error somewhere...terminating process'
+       ROLLBACK TRANSACTION T1
+   END
+ELSE
+   COMMIT TRANSACTION T1
+GO
+
+ALTER PROCEDURE [dbo].[wrapperUserSeekingStatus]
+AS
+DECLARE @StartD DATE, @EndD DATE, @F_Name VARCHAR(50), @L_Name VARCHAR(50), 
+        @Birthy DATE, @Seeking_Status_Name VARCHAR(50), @RUN INT, @RANDUser FLOAT, 
+        @RANDSeekName FLOAT
+SET @RUN = 50000
+WHILE @RUN > 0
+BEGIN
+SET @RANDUser = (SELECT LEFT(CAST(RAND()*1000 AS INT), 3))
+SET @RANDSeekName = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
+SET @F_Name = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
+SET @L_Name = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
+SET @StartD = (SELECT GETDATE() - RAND()*1000)
+SET @EndD = (SELECT DATEADD(D, 14, @StartD))
+SET @Birthy = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
+SET @Seeking_Status_Name = (SELECT SeekingStatusName FROM tblSeekingStatus 
+                            WHERE SeekingStatusID = @RANDSeekName)
+
+IF @StartD IS NULL OR
+   @EndD IS NULL OR
+   @F_Name IS NULL OR
+   @L_Name IS NULL OR
+   @Birthy IS NULL OR
+   @Seeking_Status_Name IS NULL
+    BEGIN 
+        PRINT 'Variables are null';
+        THROW 55656, 'variables cannot be NULL; process is terminating', 1;
+    END
+
+EXEC insertIntoUserSeekingStatus
+@Start_Date = @StartD,
+@End_Date = @EndD,
+@User_Fname = @F_name,
+@User_Lname = @L_Name,
+@User_DOB = @Birthy,
+@SeekStatus_Name = @Seeking_Status_Name
+
+SET @RUN = @RUN - 1
+END
+
+EXEC wrapperUserSeekingStatus
+
+
+----- Synthetic Tnx for UserJob -------
+
+CREATE PROCEDURE getRoleID
+@RName VARCHAR(50),
+@RID INTEGER OUTPUT
+
+AS
+SET @RID = (
+    SELECT RoleID
+    FROM tblRole
+    WHERE RoleName = @RName)
+GO
+
+/*
+CREATE PROCEDURE getUserID -- Ran once, works!
+@UserFNam varchar(50),
+@UserLnam varchar(200),
+@DOBBY DATE,
+@Usy_ID INT OUTPUT
+AS
+SET @Usy_ID = (SELECT UserID
+   FROM tblUser
+   WHERE UserFname = @UserFNam
+   AND UserLname = @UserLnam
+   AND UserDOB = @DOBBY)
+GO
+*/
+
+/*
+CREATE PROCEDURE getJobID 
+@JobTitle varchar(100),
+@JobID INT OUTPUT
+AS
+SET @JobID = (SELECT JobID
+   FROM tblJob
+   WHERE JobTitle = @JobTitle)
+GO
+*/
+
+CREATE PROCEDURE insertIntoUserJob
+@UserF VARCHAR(50),
+@UserL VARCHAR(50),
+@JobT VARCHAR(100),
+@RoleNamy VARCHAR(50)
+AS
+DECLARE @J_ID INT, @U_ID INT, @R_ID INT
+
+EXEC getUserID
+@UserFNam = @UserF,
+@UserLNam = @UserL,
+@Usy_ID = @U_ID OUTPUT
+
+IF @U_ID IS NULL
+    BEGIN
+        PRINT '@U_ID is NULL';
+        THROW 55656, '@U_ID cannot be NULL; process is terminating', 1;
+    END
+
+EXEC getJobID
+@JobTitle = @JobT,
+@JobID = @J_ID OUTPUT
+
+IF @J_ID IS NULL
+    BEGIN
+        PRINT '@J_ID is NULL';
+        THROW 55656, '@J_ID cannot be NULL; process is terminating', 1;
+    END
+
+EXEC getRoleID
+@RName = @RoleNamy,
+@RID = @R_ID OUTPUT
+
+IF @R_ID IS NULL
+    BEGIN
+        PRINT '@R_ID is NULL';
+        THROW 55656, '@R_ID cannot be NULL; process is terminating', 1;
+    END
+
+BEGIN TRANSACTION T1
+INSERT INTO tblUserJob (JobID, UserID, RoleID)
+VALUES (@J_ID, @U_ID, @R_ID)
+ 
+IF @@ERROR <> 0
+   BEGIN
+       PRINT '@@ERROR is showing an error somewhere...terminating process'
+       ROLLBACK TRANSACTION T1
+   END
+ELSE
+   COMMIT TRANSACTION T1
+GO
+
+-- Procedure for generating a userjob off of existing IDs
+ALTER PROCEDURE generateUserJob
+@Job_ID INTEGER,
+@User_ID INTEGER,
+@Role_ID INTEGER
+AS
+
+BEGIN TRANSACTION T1
+INSERT INTO tblUserJob (JobID, UserID, RoleID)
+VALUES(@Job_ID, @User_ID, @Role_ID)
+
+IF @@ERROR <> 0
+	BEGIN
+		PRINT '@@ERROR does not equal 0, process terminating'
+		ROLLBACK TRANSACTION T1
+	END
+ELSE
+	COMMIT TRANSACTION T1
+GO
+
+-- Procedure for populating userjob
+ALTER PROCEDURE [dbo].[wrapperUserJob]
+AS
+DECLARE @J_ID INTEGER, @U_ID INTEGER, @R_ID INTEGER, @RUN INTEGER
+SET @RUN = 10000
+
+WHILE @RUN > 0
+	BEGIN
+        SET @J_ID = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblJob) AS INT), 3))
+        SET @U_ID = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT), 3))
+        SET @R_ID = 2
+
+        IF @J_ID IS NULL OR @U_ID IS NULL OR @R_ID IS NULL
+			BEGIN 
+				PRINT 'A variable is NULL';
+				THROW 55658, 'Variables cannot be NULL, process terminating', 1;
+			END
+        INSERT INTO tblUserJob(JobID, UserID, RoleID)
+        VALUES(@J_ID, @U_ID,@R_ID)
+        SET @RUN = @RUN - 1
+END
+GO
+
+EXEC wrapperUserJob
+
+-- SELECT * FROM
+-- tblUserJob

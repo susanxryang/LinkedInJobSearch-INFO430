@@ -60,3 +60,35 @@ CREATE VIEW TOP_EMP_SAL AS (
 GO
 
 -- SELECT * FROM TOP_EMP_SAL
+
+
+-- Complex query: rank the companies with the highest average pay for intership
+WITH
+    CTE_TOP_EMP_SAL_INTERN(EmployerID, EmployerName, AvgSalary, RankingSalary)
+    AS
+    (
+        SELECT E.EmployerID, E.EmployerName, SUM(J.Salary)/COUNT(J.JobID) AS AvgSalary,
+            RANK() OVER (ORDER BY SUM(J.Salary)/COUNT(J.JobID) DESC) AS RankingPosting
+        FROM tblEmployer E
+            JOIN tblJob J ON E.EmployerID = J.EmployerID
+            JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        WHERE JT.JobTypeName = 'Internship'
+        GROUP BY E.EmployerID, E.EmployerName
+    )
+SELECT EmployerID, EmployerName, AvgSalary, RankingSalary
+FROM CTE_TOP_EMP_SAL_INTERN
+ORDER BY RankingSalary
+GO
+
+CREATE VIEW TOP_EMP_SAL_INTERN AS (
+        SELECT E.EmployerID, E.EmployerName, SUM(J.Salary)/COUNT(J.JobID) AS AvgSalary,
+            RANK() OVER (ORDER BY SUM(J.Salary)/COUNT(J.JobID) DESC) AS RankingPosting
+        FROM tblEmployer E
+            JOIN tblJob J ON E.EmployerID = J.EmployerID
+            JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+        WHERE JT.JobTypeName = 'Internship'
+        GROUP BY E.EmployerID, E.EmployerName
+    )
+GO
+
+-- SELECT * FROM TOP_EMP_SAL_INTERN

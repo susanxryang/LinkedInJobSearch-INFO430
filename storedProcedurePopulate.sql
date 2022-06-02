@@ -31,18 +31,18 @@ SET @GendID = (SELECT GenderID
 )
 GO
  
-CREATE PROCEDURE getUserID -- Ran once, works!
-@UserFNam varchar(50),
-@UserLnam varchar(200),
-@DOBBY DATE,
-@Usy_ID INT OUTPUT
-AS
-SET @Usy_ID = (SELECT UserID
-   FROM tblUser
-   WHERE UserFname = @UserFNam
-   AND UserLname = @UserLnam
-   AND UserDOB = @DOBBY)
-GO
+-- CREATE PROCEDURE getUserID -- Ran once, works!
+-- @UserFNam varchar(50),
+-- @UserLnam varchar(200),
+-- @DOBBY DATE,
+-- @Usy_ID INT OUTPUT
+-- AS
+-- SET @Usy_ID = (SELECT UserID
+--    FROM tblUser
+--    WHERE UserFname = @UserFNam
+--    AND UserLname = @UserLnam
+--    AND UserDOB = @DOBBY)
+-- GO
  
 -- EASY stored procedures
 CREATE PROCEDURE getLocationID
@@ -242,10 +242,10 @@ EXEC getUserID
 @UserLnam = @Lnamm,
 @DOBBY = @Dobie,
 @Usy_ID = @U_ID OUTPUT
- 
+
 IF @U_ID IS NULL
-   PRINT @U_ID
   BEGIN
+      -- PRINT 'found uid to be null here'
       PRINT '@U_ID is NULL';
       THROW 55656, '@U_ID cannot be NULL; process is terminating', 1;
   END
@@ -267,11 +267,11 @@ ALTER PROCEDURE [dbo].[wrapperMembership]
 AS
 DECLARE @Stary VARCHAR(50), @Eny VARCHAR(50), @Fna VARCHAR(50), @Lna VARCHAR(50),
 @Dobb DATE, @MembTypee VARCHAR(100), @RUN INT, @RANDUser FLOAT, @RANDMemType FLOAT
-SET @RUN = 1 -- (SELECT COUNT(*) FROM tblUser)
+SET @RUN = (SELECT COUNT(*) FROM tblUser)
 WHILE @RUN > 0
 BEGIN
-SET @RANDUser = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT), 3))
-SET @RANDMemType = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
+SET @RANDUser = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT)))
+SET @RANDMemType = (SELECT FLOOR(CAST(RAND()*2 + 1 AS INT)))
 SET @Fna = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
 SET @Lna = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
 SET @Stary = (SELECT GETDATE() - RAND()*1000)
@@ -288,8 +288,8 @@ IF @Fna IS NULL OR @Lna  IS NULL OR @Stary IS NULL
 EXEC insertIntoMembership
 @Starty = @Stary,
 @Enddy = @Eny,
-@Fnamm = Fna,
-@Lnamm = Lna,
+@Fnamm = @Fna,
+@Lnamm = @Lna,
 @Dobie = @Dobb,
 @MembType = @MembTypee
  
@@ -302,6 +302,13 @@ EXEC [wrapperMembership]
 SELECT COUNT(*) FROM tblMembership
 GO
 
+
+EXEC getUserID
+@UserFNam = 'Tashia',
+@UserLnam = 'Schrenk',
+@DOBBY = 1954-10-23,
+@Usy_ID OUTPUT
+-- select * from tblUser where UserID = 4478
 --  Jacob Code, Populating JobStatus 
 
 -- Get StatusID Procedure

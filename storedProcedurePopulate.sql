@@ -302,12 +302,6 @@ EXEC [wrapperMembership]
 SELECT COUNT(*) FROM tblMembership
 GO
 
-
-EXEC getUserID
-@UserFNam = 'Tashia',
-@UserLnam = 'Schrenk',
-@DOBBY = 1954-10-23,
-@Usy_ID OUTPUT
 -- select * from tblUser where UserID = 4478
 --  Jacob Code, Populating JobStatus 
 

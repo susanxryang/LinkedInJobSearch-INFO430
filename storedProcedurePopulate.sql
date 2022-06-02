@@ -302,30 +302,6 @@ EXEC [wrapperMembership]
 SELECT COUNT(*) FROM tblMembership
 GO
 
---  Jacob Code, Populating JobStatus 
-
--- Get StatusID Procedure
-CREATE PROCEDURE strozj_getStatusID
-@StatusName varchar(50),
-@S_ID INTEGER OUTPUT
-
-AS
-SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
-
-GO
-
-CREATE PROCEDURE strozj_getJobID
-@JobTypeID INT,
-@LevelID INT,
-@EmployerID INT,
-@PositionID INT,
-@J_ID INTEGER OUTPUT
-
-AS
-SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTypeID = @JobTypeID AND J.LevelID = @LevelID AND J.EmployerID = @EmployerID AND J.PositionID = @PositionID)
-
-GO
-
 -- Synthetic Tnx to Insert into Employer --
 CREATE PROCEDURE insertIntoEmployer
 @EmpName varchar(50),
@@ -433,6 +409,38 @@ EXEC [wrapperEmployer]
 SELECT * FROM tblEmployer
 GO
 
+--  Jacob Code, Populating JobStatus 
+
+-- Get StatusID Procedure
+CREATE PROCEDURE getStatusID
+@StatusName varchar(50),
+@S_ID INTEGER OUTPUT
+
+AS
+SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
+
+GO
+
+CREATE PROCEDURE getJobIDFromTitle
+@Job_Title varchar(50),
+@J_ID INTEGER OUTPUT
+
+AS 
+SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTitle = @Job_Title)
+
+GO
+
+CREATE PROCEDURE getJobID
+@JobTypeID INT,
+@LevelID INT,
+@EmployerID INT,
+@PositionID INT,
+@J_ID INTEGER OUTPUT
+
+AS
+SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTypeID = @JobTypeID AND J.LevelID = @LevelID AND J.EmployerID = @EmployerID AND J.PositionID = @PositionID)
+
+GO
 
 -- Procedure for inserting specific rows into JobStatus
 CREATE PROCEDURE strozj_insertIntoJobStatus
@@ -446,7 +454,7 @@ CREATE PROCEDURE strozj_insertIntoJobStatus
 AS
 DECLARE @Job_ID INT, @Status_ID INT
 
-EXEC strozj_getJobID
+EXEC getJobID
 @JobTypeID = @JobType_ID,
 @LevelID = @Level_ID,
 @EmployerID = @Employer_ID,
@@ -484,12 +492,12 @@ ELSE
 GO
 
 -- Procedure for generating a job status off of existing IDs
-CREATE PROCEDURE strozj_generateJobStatus
-@JobID INTEGER,
+
+CREATE PROCEDURE generateJobStatus
+@JobID varchar(50),
 @StatusID INTEGER,
 @StartDate DATE,
 @EndDate DATE
-
 AS
 
 BEGIN TRANSACTION T1
@@ -507,17 +515,22 @@ ELSE
 GO
 
 -- Procedure for populating JobStatus
-CREATE PROCEDURE [dbo].[wrapperJobStatus]
+ALTER PROCEDURE [dbo].[wrapperJobStatus]
 AS
-DECLARE @Job_ID INTEGER, @Status_ID INTEGER, @Start_Date DATE, @End_Date DATE, @RUN INTEGER
+DECLARE @Job_ID INTEGER,
+@Status_ID INTEGER,
+@Start_Date DATE,
+@End_Date DATE,
+@RUN INTEGER,
+@Job_Title varchar(50)
 
-SET @RUN = (SELECT COUNT(*) FROM tblJob)
+SET @RUN = 450000
 
 WHILE @RUN > 0
 	BEGIN
 
-		SET @Job_ID = @RUN
-		SET @Status_ID = (SELECT FLOOR(RAND() * 3)+1) -- Select random StatusID (1 (Open) or 2 (Closed))
+		SET @Job_ID = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblJob) AS INT)))
+		SET @Status_ID =  (SELECT FLOOR(RAND() * 3)+1) -- Select random 1 to 3
 		SET @Start_Date = (SELECT GETDATE() - RAND()*1000)
 		SET @End_Date =  (SELECT DATEADD(DAY, 14, @Start_Date))
 
@@ -527,14 +540,64 @@ WHILE @RUN > 0
 				THROW 55658, 'Variables cannot be NULL, process terminating', 1;
 			END
 
-		EXEC strozj_generateJobStatus
+		EXEC generateJobStatus
 		@JobID = @Job_ID,
 		@StatusID = @Status_ID,
 		@StartDate = @Start_Date,
 		@EndDate = @End_Date
 
-		SET @RUN = @RUN -1
-
+		SET @RUN = @RUN - 1
 	END
+GO
 
+-- JobLocation Population Code
+
+CREATE PROCEDURE generateJobLocation
+@JobID INTEGER,
+@LocationID INTEGER
+AS
+
+BEGIN TRANSACTION T1
+INSERT INTO tblJobLocation
+VALUES(@LocationID, @JobID)
+
+IF @@ERROR <> 0
+	BEGIN
+		PRINT '@@ERROR does not equal 0, process terminating'
+		ROLLBACK TRANSACTION T1
+	END
+ELSE
+	COMMIT TRANSACTION T1
+
+GO
+
+
+-- Procedure for populating JobLocation with locationID from Employer table
+
+CREATE PROCEDURE [dbo].[wrapperJobLocation]
+AS
+DECLARE @Job_ID INTEGER,
+@Location_ID INTEGER,
+@RUN INTEGER
+
+SET @RUN = (SELECT COUNT(*) FROM tblJob)
+
+WHILE @RUN > 0
+	BEGIN
+
+		SET @Job_ID = @RUN
+		SET @Location_ID = (SELECT E.LocationID FROM tblJob J JOIN tblEmployer E ON E.EmployerID = J.EmployerID WHERE J.JobID = @Job_ID)
+
+		IF @Job_ID IS NULL OR @Location_ID IS NULL
+			BEGIN 
+				PRINT 'A variable is NULL';
+				THROW 55658, 'Variables cannot be NULL, process terminating', 1;
+			END
+
+		EXEC generateJobLocation
+		@JobID = @Job_ID,
+		@LocatiONID = @Location_ID
+
+		SET @RUN = @RUN - 1
+	END
 GO

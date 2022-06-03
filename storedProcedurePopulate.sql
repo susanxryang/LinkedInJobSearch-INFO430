@@ -1,4 +1,4 @@
--- USE INFO430_Proj_08
+USE INFO430_Proj_08
  
 -- EASY stored procedures
 CREATE PROCEDURE getUserTypeID
@@ -302,13 +302,10 @@ EXEC [wrapperMembership]
 SELECT COUNT(*) FROM tblMembership
 GO
 
-<<<<<<< HEAD
-=======
--- select * from tblUser where UserID = 4478
 --  Jacob Code, Populating JobStatus 
 
 -- Get StatusID Procedure
-CREATE PROCEDURE strozj_getStatusID
+CREATE PROCEDURE getStatusID
 @StatusName varchar(50),
 @S_ID INTEGER OUTPUT
 
@@ -317,19 +314,26 @@ SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
 
 GO
 
-CREATE PROCEDURE strozj_getJobID
-@JobTypeID INT,
-@LevelID INT,
-@EmployerID INT,
-@PositionID INT,
+-- Get JobID Procedure
+CREATE PROCEDURE getJobID
+@JobTitle varchar(50),
+@JobTypeName varchar(50),
+@LevelName varchar(50),
+@EmployerName varchar(50),
+@PositionName varchar(50),
 @J_ID INTEGER OUTPUT
 
 AS
-SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTypeID = @JobTypeID AND J.LevelID = @LevelID AND J.EmployerID = @EmployerID AND J.PositionID = @PositionID)
+SET @J_ID = (SELECT JobID FROM tblJob J
+	JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+	JOIN tblLevel L ON J.LevelID = L.LevelID
+	JOIN tblPosition P ON J.PositionID = P.PositionID
+	JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+	WHERE J.JobTitle = @JobTitle AND JT.JobTypeName = @JobTypeName AND L.LevelName = @LevelName AND E.EmployerName = @EmployerName AND P.PositionName = @PositionName)
 
 GO
 
->>>>>>> ea10686a32451aea207cb88fb4dcc9c916949997
+
 -- Synthetic Tnx to Insert into Employer --
 CREATE PROCEDURE insertIntoEmployer
 @EmpName varchar(50),
@@ -388,9 +392,6 @@ ELSE
 GO
 
 -- DBCC CHECKIDENT(tblUser, RESEED, 0)
--- GO
--- DELETE FROM tblEmployer WHERE EmployerID != 1
--- select * from tblEmployer
 
 ALTER PROCEDURE [dbo].[wrapperEmployer]
 AS
@@ -431,10 +432,6 @@ BEGIN
 
     SET @RUN = @RUN - 1
     END
-
-SELECT COUNT(*) FROM tblEmployer
-EXEC [wrapperEmployer]
-SELECT * FROM tblEmployer
 GO
 
 --  Jacob Code, Populating JobStatus 
@@ -449,44 +446,25 @@ SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
 
 GO
 
-CREATE PROCEDURE getJobIDFromTitle
-@Job_Title varchar(50),
-@J_ID INTEGER OUTPUT
-
-AS 
-SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTitle = @Job_Title)
-
-GO
-
-CREATE PROCEDURE getJobID
-@JobTypeID INT,
-@LevelID INT,
-@EmployerID INT,
-@PositionID INT,
-@J_ID INTEGER OUTPUT
-
-AS
-SET @J_ID = (SELECT JobID FROM tblJob J WHERE J.JobTypeID = @JobTypeID AND J.LevelID = @LevelID AND J.EmployerID = @EmployerID AND J.PositionID = @PositionID)
-
-GO
-
 -- Procedure for inserting specific rows into JobStatus
-CREATE PROCEDURE insertIntoJobStatus
-@JobType_ID INTEGER,
-@Level_ID INTEGER,
-@Employer_ID INTEGER,
-@Position_ID INTEGER,
+ALTER PROCEDURE insertIntoJobStatus
+@Job_Title varchar(50),
+@Job_Type_Name varchar(50),
+@Level_Name varchar(50),
+@Employer_Name varchar(50),
+@Position_Name varchar(50),
 @Status_Name varchar(50),
-@StartDate DATE,
-@EndDate DATE
+@Start_Date DATE,
+@End_Date DATE
 AS
 DECLARE @Job_ID INT, @Status_ID INT
 
 EXEC getJobID
-@JobTypeID = @JobType_ID,
-@LevelID = @Level_ID,
-@EmployerID = @Employer_ID,
-@PositionID = @Position_ID,
+@JobTitle = @Job_Title,
+@JobTypeName = @Job_Type_Name,
+@LevelName = @Level_Name,
+@EmployerName = @Employer_Name,
+@PositionName = @Position_Name,
 @J_ID = @Job_ID OUTPUT
 
 IF @Job_ID IS NULL
@@ -507,30 +485,7 @@ IF @Status_ID IS NULL
 
 BEGIN TRANSACTION T1
 INSERT INTO tblJobStatus
-VALUES(@Job_ID, @Status_ID, @StartDate, @EndDate)
-
-IF @@ERROR <> 0
-	BEGIN
-		PRINT '@@ERROR does not equal 0, process terminating'
-		ROLLBACK TRANSACTION T1
-	END
-ELSE
-	COMMIT TRANSACTION T1
-
-GO
-
--- Procedure for generating a job status off of existing IDs
-
-CREATE PROCEDURE generateJobStatus
-@JobID varchar(50),
-@StatusID INTEGER,
-@StartDate DATE,
-@EndDate DATE
-AS
-
-BEGIN TRANSACTION T1
-INSERT INTO tblJobStatus
-VALUES(@JobID, @StatusID, @StartDate, @EndDate)
+VALUES(@Job_ID, @Status_ID, @Start_Date, @End_Date)
 
 IF @@ERROR <> 0
 	BEGIN
@@ -544,35 +499,49 @@ GO
 
 -- Procedure for populating JobStatus
 ALTER PROCEDURE [dbo].[wrapperJobStatus]
+@RUN INTEGER
 AS
 DECLARE @Job_ID INTEGER,
 @Status_ID INTEGER,
-@Start_Date DATE,
-@End_Date DATE,
-@RUN INTEGER,
-@Job_Title varchar(50)
-
-SET @RUN = 450000
+@JobTitle varchar(50),
+@JobTypeName varchar(50),
+@LevelName varchar(50),
+@EmployerName varchar(50),
+@PositionName varchar(50),
+@StatusName varchar(50),
+@StartDate DATE,
+@EndDate DATE
 
 WHILE @RUN > 0
 	BEGIN
 
 		SET @Job_ID = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblJob) AS INT)))
 		SET @Status_ID =  (SELECT FLOOR(RAND() * 3)+1) -- Select random 1 to 3
-		SET @Start_Date = (SELECT GETDATE() - RAND()*1000)
-		SET @End_Date =  (SELECT DATEADD(DAY, 14, @Start_Date))
+		SET @StartDate = (SELECT GETDATE() - RAND()*1000)
+		SET @EndDate =  (SELECT DATEADD(DAY, 14, @StartDate))
 
-		IF @Job_ID IS NULL OR @Status_ID IS NULL OR @Start_Date IS NULL OR @End_Date IS NULL
+		SET @JobTitle = (SELECT JobTitle FROM tblJob WHERE JobID = @Job_ID)
+		SET @JobTypeName = (SELECT JobTypeName FROM tblJobType JT JOIN tblJob J ON JT.JobTypeID = J.JobTypeID WHERE J.JobID = @Job_ID)
+		SET @LevelName = (SELECT LevelName FROM tblLevel L JOIN tblJob J ON L.LevelID = J.LevelID WHERE J.JobID = @Job_ID)
+		SET @EmployerName = (SELECT EmployerName FROM tblEmployer E JOIN tblJob J ON E.EmployerID = J.EmployerID WHERE J.JobID = @Job_ID)
+		SET @PositionName = (SELECT PositionName FROM tblPosition P JOIN tblJob J ON P.PositionID = J.PositionID WHERE J.JobID = @Job_ID)
+		SET @StatusName = (SELECT StatusName FROM tblStatus WHERE StatusID = @Status_ID)
+
+		IF @JobTitle IS NULL OR @JobTypeName IS NULL OR @LevelName IS NULL OR @EmployerName IS NULL OR @PositionName IS NULL OR @StatusName IS NULL
 			BEGIN 
 				PRINT 'A variable is NULL';
 				THROW 55658, 'Variables cannot be NULL, process terminating', 1;
 			END
 
-		EXEC generateJobStatus
-		@JobID = @Job_ID,
-		@StatusID = @Status_ID,
-		@StartDate = @Start_Date,
-		@EndDate = @End_Date
+		EXEC insertIntoJobStatus
+		@Job_Title = @JobTitle,
+		@Job_Type_Name = @JobTypeName,
+		@Level_Name = @LevelName,
+		@Employer_Name = @EmployerName,
+		@Position_Name = @PositionName,
+		@Status_Name = @StatusName,
+		@Start_Date = @StartDate,
+		@End_Date = @EndDate
 
 		SET @RUN = @RUN - 1
 	END
@@ -580,14 +549,47 @@ GO
 
 -- JobLocation Population Code
 
-CREATE PROCEDURE generateJobLocation
-@JobID INTEGER,
-@LocationID INTEGER
+ALTER PROCEDURE generateJobLocation
+@Job_Title varchar(50),
+@Job_Type_Name varchar(50),
+@Level_Name varchar(50),
+@Employer_Name varchar(50),
+@Position_Name varchar(50),
+@Country_Name varchar(50),
+@City_Name varchar(50)
+
 AS
+DECLARE @Job_ID INTEGER, @Location_ID INTEGER
+
+EXEC getJobID
+@JobTitle = @Job_Title,
+@JobTypeName = @Job_Type_Name,
+@LevelName = @Level_Name,
+@EmployerName = @Employer_Name,
+@PositionName = @Position_Name,
+@J_ID = @Job_ID OUTPUT
+
+IF @Job_ID IS NULL
+	BEGIN
+		PRINT '@Job_ID is NULL';
+		THROW 55658, 'Job_ID cannot be NULL, process terminating', 1;
+	END
+
+EXEC getLocationID
+@CityName = @City_Name,
+@CountryName = @Country_Name,
+@LocID = @Location_ID OUTPUT
+
+IF @Location_ID IS NULL
+	BEGIN
+		PRINT '@Location_ID is NULL';
+		THROW 55658, 'Job_ID cannot be NULL, process terminating', 1;
+	END
+
 
 BEGIN TRANSACTION T1
 INSERT INTO tblJobLocation
-VALUES(@LocationID, @JobID)
+VALUES(@Location_ID, @Job_ID)
 
 IF @@ERROR <> 0
 	BEGIN
@@ -602,34 +604,52 @@ GO
 
 -- Procedure for populating JobLocation with locationID from Employer table
 
-CREATE PROCEDURE [dbo].[wrapperJobLocation]
+ALTER PROCEDURE [dbo].[wrapperJobLocation]
+@Run INTEGER
 AS
 DECLARE @Job_ID INTEGER,
 @Location_ID INTEGER,
-@RUN INTEGER
-
-SET @RUN = (SELECT COUNT(*) FROM tblJob)
+@Status_ID INTEGER,
+@JobTitle varchar(50),
+@JobTypeName varchar(50),
+@LevelName varchar(50),
+@EmployerName varchar(50),
+@PositionName varchar(50),
+@CountryName varchar(50),
+@CityName varchar(50)
 
 WHILE @RUN > 0
 	BEGIN
 
-		SET @Job_ID = @RUN
+		SET @Job_ID = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblJob) AS INT)))
 		SET @Location_ID = (SELECT E.LocationID FROM tblJob J JOIN tblEmployer E ON E.EmployerID = J.EmployerID WHERE J.JobID = @Job_ID)
 
-		IF @Job_ID IS NULL OR @Location_ID IS NULL
+		SET @JobTitle = (SELECT JobTitle FROM tblJob WHERE JobID = @Job_ID)
+		SET @JobTypeName = (SELECT JobTypeName FROM tblJobType JT JOIN tblJob J ON JT.JobTypeID = J.JobTypeID WHERE J.JobID = @Job_ID)
+		SET @LevelName = (SELECT LevelName FROM tblLevel L JOIN tblJob J ON L.LevelID = J.LevelID WHERE J.JobID = @Job_ID)
+		SET @EmployerName = (SELECT EmployerName FROM tblEmployer E JOIN tblJob J ON E.EmployerID = J.EmployerID WHERE J.JobID = @Job_ID)
+		SET @PositionName = (SELECT PositionName FROM tblPosition P JOIN tblJob J ON P.PositionID = J.PositionID WHERE J.JobID = @Job_ID)
+		SET @CountryName = (SELECT Country FROM tblLocation WHERE LocationID = @Location_ID)
+		SET @CityName = (SELECT City FROM tblLocation WHERE LocationID = @Location_ID)
+
+		IF @JobTitle IS NULL OR @JobTypeName IS NULL OR @LevelName IS NULL OR @EmployerName IS NULL OR @PositionName IS NULL OR @CountryName IS NULL OR @CityName IS NULL
 			BEGIN 
 				PRINT 'A variable is NULL';
 				THROW 55658, 'Variables cannot be NULL, process terminating', 1;
 			END
 
 		EXEC generateJobLocation
-		@JobID = @Job_ID,
-		@LocatiONID = @Location_ID
+		@Job_Title = @JobTitle,
+		@Job_Type_Name = @JobTypeName,
+		@Level_Name = @LevelName,
+		@Employer_Name = @EmployerName,
+		@Position_Name = @PositionName,
+		@Country_Name = @CountryName,
+		@City_Name = @CityName
 
 		SET @RUN = @RUN - 1
 	END
 GO
-
 
 -- Synthetic Tnx for tblUserSeekingStatus
 
@@ -758,31 +778,6 @@ SET @RID = (
     WHERE RoleName = @RName)
 GO
 
-/*
-CREATE PROCEDURE getUserID -- Ran once, works!
-@UserFNam varchar(50),
-@UserLnam varchar(200),
-@DOBBY DATE,
-@Usy_ID INT OUTPUT
-AS
-SET @Usy_ID = (SELECT UserID
-   FROM tblUser
-   WHERE UserFname = @UserFNam
-   AND UserLname = @UserLnam
-   AND UserDOB = @DOBBY)
-GO
-*/
-
-/*
-CREATE PROCEDURE getJobID 
-@JobTitle varchar(100),
-@JobID INT OUTPUT
-AS
-SET @JobID = (SELECT JobID
-   FROM tblJob
-   WHERE JobTitle = @JobTitle)
-GO
-*/
 
 CREATE PROCEDURE insertIntoUserJob
 @UserF VARCHAR(50),
@@ -880,6 +875,3 @@ END
 GO
 
 EXEC wrapperUserJob
-
--- SELECT * FROM
--- tblUserJob

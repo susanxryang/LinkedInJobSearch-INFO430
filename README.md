@@ -3,7 +3,7 @@ Tables:
 - [x] UserType (regular vs influencer)
 - [x] Gender
 - [x] MemebershipType
-- [ ] Membership (Jason)
+- [x] Membership (Jason)
 - [x] User (Jason)
 
 - [x] UserSeekingStatus
@@ -19,7 +19,7 @@ Tables:
 - [x] Industry
 
 - [x] Location (Jacob)
-- [ ] JobLocation (Jacob)
+- [x] JobLocation (Jacob)
 - [x] JobType (part-time, full-time, contract/seasonal, internship, apprenticeship)
 - [x] Level (Junior, Mid-level, Senior, Exec)
 - [x] Position
@@ -27,7 +27,7 @@ Tables:
 
 
 Business rules: (check assignments in google doc: https://docs.google.com/document/d/1o_oB73rdUzYbMu2MnjwLHFvSWBbpU8-GPFMmLb29F7A/edit)
-- [ ] User cannot cancel and restart membership within 3 month period (membership)
+- [x] User cannot cancel and restart membership within 3 month period (membership)
 - [x] Influencer can only apply to exec jobs (user type)
 - [x] Age < 30 cannot apply to senior positions (position)
 - [x] Age <18 cannot apply to jobs
@@ -37,8 +37,8 @@ Business rules: (check assignments in google doc: https://docs.google.com/docume
 - [x] One user cannot apply to same job twice (user job)
 - [x] One user cannot be both recruiter and applicant for one job (user job)
 - [x] One cannot apply to closed jobs (job)
-- [ ] Exec position must have salary > 200k
-- [ ] All employers must have at least 1 US location
+- [x] Exec position must have salary > 200k
+- [x] All employers must have at least 1 US location
 - [x] All US software engineer positions has salary > 80k
 
 

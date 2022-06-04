@@ -3,7 +3,6 @@ USE INFO430_Proj_08
 -- IMPORTANT --
 -- Code for reseeding tables (in case you need to repopulate, change 'tblUser' to name of the table)
 -- DBCC CHECKIDENT(tblUser, RESEED, 0)
- 
 
 
 -- GetID Stored Procedures

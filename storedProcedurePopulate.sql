@@ -16,6 +16,14 @@ SET @UseTypID = (SELECT UserTypeID
    WHERE UserTypeName = @UserTypeN)
 
 GO
+
+CREATE PROCEDURE getJobIDFromTitle
+@JobTitle varchar(50),
+@JobID INT OUTPUT
+AS
+SET @JobID = (SELECT JobID FROM tblJob WHERE JobTitle = @JobTitle)
+
+GO
  
 CREATE PROCEDURE getMemTypeID
 @Memmy varchar(50),

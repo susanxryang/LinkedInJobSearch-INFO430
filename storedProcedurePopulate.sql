@@ -701,7 +701,7 @@ DECLARE @StartD DATE, @EndD DATE, @F_Name VARCHAR(50), @L_Name VARCHAR(50),
 
 WHILE @RUN > 0
 	BEGIN
-		SET @RANDUser = (SELECT LEFT(CAST(RAND()*1000 AS INT), 3))
+		SET @RANDUser = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblUser) AS INT), 3))
 		SET @RANDSeekName = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
 		SET @F_Name = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
 		SET @L_Name = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
@@ -732,15 +732,15 @@ WHILE @RUN > 0
 
 		SET @RUN = @RUN - 1
 	END
-
+GO
 
 
 ----- Synthetic Tnx for UserJob -------
-
-CREATE PROCEDURE insertIntoUserJob
+ALTER PROCEDURE insertIntoUserJob
 @UserF VARCHAR(50),
 @UserL VARCHAR(50),
 @JobT VARCHAR(100),
+@DOB DATE,
 @RoleNamy VARCHAR(50)
 AS
 DECLARE @J_ID INT, @U_ID INT, @R_ID INT
@@ -748,6 +748,7 @@ DECLARE @J_ID INT, @U_ID INT, @R_ID INT
 EXEC getUserID
 @UserFNam = @UserF,
 @UserLNam = @UserL,
+@DOBBY = @DOB,
 @Usy_ID = @U_ID OUTPUT
 
 IF @U_ID IS NULL
@@ -756,7 +757,7 @@ IF @U_ID IS NULL
         THROW 55656, '@U_ID cannot be NULL; process is terminating', 1;
     END
 
-EXEC getJobID
+EXEC getJobIDFromTitle
 @JobTitle = @JobT,
 @JobID = @J_ID OUTPUT
 
@@ -813,13 +814,19 @@ GO
 ALTER PROCEDURE [dbo].[wrapperUserJob]
 @RUN INTEGER
 AS
-DECLARE @J_ID INTEGER, @U_ID INTEGER, @R_ID INTEGER
+DECLARE @J_ID INTEGER, @U_ID INTEGER, @R_ID INTEGER, @UFName VARCHAR(50), @ULName VARCHAR(50),
+        @J_Titile VARCHAR(50), @R_Namy VARCHAR (50), @UDOB DATE
 
 WHILE @RUN > 0
 	BEGIN
-        SET @J_ID = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblJob) AS INT), 3))
-        SET @U_ID = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT), 3))
+        SET @J_ID = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblJob) + 1 AS INT), 4))
+        SET @U_ID = (SELECT LEFT(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) + 1 AS INT), 5))
         SET @R_ID = 2
+        SET @UFName = (SELECT UserFname FROM tblUser WHERE UserID = @U_ID)
+        SET @ULName = (SELECT UserLname FROM tblUser WHERE UserID = @U_ID)
+        SET @UDOB = (SELECT UserDOB FROM tblUser WHERE UserID = @U_ID)
+        SET @J_Titile = (SELECT JobTitle FROM tblJob WHERE JobID = @J_ID)
+        SET @R_Namy = (SELECT RoleName FROM tblRole WHERE RoleID = @R_ID)
 
         IF @J_ID IS NULL OR @U_ID IS NULL OR @R_ID IS NULL
 			BEGIN 
@@ -827,10 +834,34 @@ WHILE @RUN > 0
 				THROW 55658, 'Variables cannot be NULL, process terminating', 1;
 			END
 
-        INSERT INTO tblUserJob(JobID, UserID, RoleID)
-        VALUES(@J_ID, @U_ID,@R_ID)
+        EXEC insertIntoUserJob
+        @UserF = @UFName,
+        @UserL = @ULName,
+        @JobT = @J_Titile,
+        @DOB = @UDOB,
+        @RoleNamy = @R_Namy
 
         SET @RUN = @RUN - 1
 	END
 GO
+-- DBCC CHECKIDENT(tblUserJob, RESEED, 0)
+-- EXEC wrapperUserJob 3
+-- select * from tblUserJob
 
+-- fix job title to not have '.' since it's breaking insertintouserjob
+DECLARE @CURREM VARCHAR(200), @CURRPOS INT, @RAND INT, @CURRJOB INT, @RUN INT, @MATCHPOS INT
+SET @RUN = (SELECT COUNT(*) FROM tblJob)
+WHILE @RUN > 0
+BEGIN
+   SET @CURRJOB = @RUN
+   SET @CURREM = (SELECT EmployerName FROM tblJob J JOIN tblEmployer E ON J.EmployerID = E.EmployerID AND J.JobID = @CURRJOB)
+   SET @CURRPOS = (SELECT P.PositionID FROM tblJob J JOIN tblPosition P ON J.PositionID = P.PositionID AND J.JobID = @CURRJOB)
+   SET @RAND = (CEILING(RAND() * 99999))
+   IF (@CURREM like '%.%')
+      SET @MATCHPOS = (SELECT CHARINDEX('.', @CURREM))
+      SET @CURREM = SUBSTRING(@CURREM, 0, (@MATCHPOS))
+   UPDATE tblJob 
+   SET JobTitle = CONCAT(@CURREM, '') + '-' + CONCAT(@CURRPOS,'') + '-' + CONCAT(@RAND,'')
+   WHERE JobID = @CURRJOB
+SET @RUN = @RUN - 1
+END

@@ -29,7 +29,7 @@ GO
 ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT Influencer_Application_Level_Requirement_Restriction
 CHECK (dbo.strozj_influencer_only_exec() = 0)
-
+-- ALTER TABLE tblUserJob DROP CONSTRAINT Influencer_Application_Level_Requirement_Restriction
 GO
 
 /*
@@ -84,7 +84,7 @@ GO
 ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT Young_Application_Seniority_Restriction
 CHECK (dbo.strozj_young_cannot_apply_senior() = 0)
-
+-- ALTER TABLE tblUserJob DROP CONSTRAINT Young_Application_Seniority_Restriction
 GO
 
 /*
@@ -184,7 +184,7 @@ ALTER TABLE tblJob with nocheck
 ADD CONSTRAINT CK_NoSde80k
 CHECK (dbo.xuanry_fn_sde80k() = 0)
 GO
-
+-- ALTER TABLE tblUserJob DROP CONSTRAINT CK_NoSde80k
 
 -- computed columns Susan
 use INFO430_Proj_08
@@ -268,6 +268,7 @@ ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT SorryTooYoung18job
 CHECK (dbo.ageUnder18noJob() = 0)
 GO
+-- ALTER TABLE tblJob DROP CONSTRAINT SorryTooYoung18job
 
 -- 2) no one over age 24 can apply to internships
 CREATE FUNCTION ageOver24noInternshipUhh()
@@ -289,6 +290,8 @@ DECLARE @RET INT = 0
     RETURN @RET
 END
 GO
+-- ALTER TABLE tblUserJob DROP CONSTRAINT ageOver24noInternshipPLEASE
+
 
 ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT ageOver24noInternshipPLEASE
@@ -410,6 +413,7 @@ ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT Both_Recruiter_Applicant_Restriction
 CHECK (dbo.cannot_both_recruiter_applicant() = 0)
 GO
+-- ALTER TABLE tblUserJob DROP CONSTRAINT Both_Recruiter_Applicant_Restriction
 
 
 -- Computed Columns

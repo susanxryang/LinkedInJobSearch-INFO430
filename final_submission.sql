@@ -1,5 +1,7 @@
+-- TEAM 8: Susan, Jerray, Jacob, Jason
+-- LinkedIn Job Search DB
+
 CREATE DATABASE INFO430_Proj_08
--- BACKUP DATABASE INFO430_Proj_8 TO DISK = '/Users/susanyang/Desktop/INFO430'
 BACKUP DATABASE INFO430_Proj_08 TO DISK = 'C:\SQL\INFO430_Proj_08.BAK'
 
 USE INFO430_Proj_08
@@ -177,6 +179,202 @@ VALUES ('Startup', '10'),('X-Small', '50'),('Small', '200'),('Small-Medium', '50
 INSERT INTO tblRole (RoleName, RoleDescr)
 VALUES ('Recuiter', 'recruiter of this job'),('Applicant', 'Applicant of this job')
 
+INSERT INTO tblPosition (PositionName)
+VALUES ('Marketing Specialist'),
+('Marketing Manager'),
+('Marketing Director'),
+('Graphic Designer'),
+('Marketing Research Analyst'),
+('Marketing Communications Manager'),
+('Marketing Consultant'),
+('Product Manager'),
+('Public Relations'),
+('Social Media Assistant'),
+('Brand Manager'),
+('SEO Manager'),
+('Content Marketing Manager'),
+('Copywriter'),
+('Media Buyer'),
+('Digital Marketing Manager'),
+('eCommerce Marketing Specialist'),
+('Brand Strategist'),
+('Vice President of Marketing'),
+('Media Relations Coordinator'),
+('Administrative Assistant'),
+('Receptionist'),
+('Office Manager'),
+('Auditing Clerk'),
+('Bookkeeper'),
+('Account Executive'),
+('Branch Manager'),
+('Business Manager'),
+('Quality Control Coordinator'),
+('Administrative Manager'),
+('Chief Executive Officer'),
+('Business Analyst'),
+('Risk Manager'),
+('Human Resources'),
+('Office Assistant'),
+('Secretary'),
+('Office Clerk'),
+('File Clerk'),
+('Account Collector'),
+('Administrative Specialist'),
+('Executive Assistant'),
+('Program Administrator'),
+('Program Manager'),
+('Administrative Analyst'),
+('Data Entry'),
+('CEO—Chief Executive Officer'),
+('COO—Chief Operating Officer'),
+('CFO—Chief Financial Officer'),
+('CIO—Chief Information Officer'),
+('CTO—Chief Technology Officer'),
+('CMO—Chief Marketing Officer'),
+('CHRO—Chief Human Resources Officer'),
+('CDO—Chief Data Officer'),
+('CPO—Chief Product Officer'),
+('CCO—Chief Customer Officer'),
+('IT Professional'),
+('UX Designer & UI Developer'),
+('SQL Developer'),
+('Web Designer'),
+('Web Developer'),
+('Help Desk Worker/Desktop Support'),
+('Software Engineer'),
+('Data Entry'),
+('DevOps Engineer'),
+('Computer Programmer'),
+('Network Administrator'),
+('Information Security Analyst'),
+('Artificial Intelligence Engineer'),
+('Cloud Architect'),
+('IT Manager'),
+('Technical Specialist'),
+('Application Developer'),
+('Sales Associate'),
+('Sales Representative'),
+('Sales Manager'),
+('Retail Worker'),
+('Store Manager'),
+('Sales Representative'),
+('Real Estate Broker'),
+('Sales Associate'),
+('Cashier'),
+('Store Manager'),
+('Account Executive'),
+('Account Manager'),
+('Area Sales Manager'),
+('Direct Salesperson'),
+('Director of Inside Sales'),
+('Outside Sales Manager'),
+('Sales Analyst'),
+('Market Development Manager'),
+('B2B Sales Specialist'),
+('Sales Engineer'),
+('Merchandising Associate'),
+('Construction Worker'),
+('Taper'),
+('Plumber'),
+('Heavy Equipment Operator'),
+('Vehicle or Equipment Cleaner'),
+('Carpenter'),
+('Electrician'),
+('Painter'),
+('Welder'),
+('Handyman'),
+('Boilermaker'),
+('Crane Operator'),
+('Building Inspector'),
+('Pipefitter'),
+('Sheet Metal Worker'),
+('Iron Worker'),
+('Mason'),
+('Roofer'),
+('Solar Photovoltaic Installer'),
+('Well Driller'),
+('Virtual Assistant'),
+('Customer Service'),
+('Customer Support'),
+('Concierge'),
+('Help Desk'),
+('Customer Service Manager'),
+('Technical Support Specialist'),
+('Account Representative'),
+('Client Service Specialist'),
+('Customer Care Associate'),
+('Operations Manager'),
+('Operations Assistant'),
+('Operations Coordinator'),
+('Operations Analyst'),
+('Operations Director'),
+('Vice President of Operations'),
+('Operations Professional'),
+('Scrum Master'),
+('Continuous Improvement Lead'),
+('Continuous Improvement Consultant'),
+('Credit Authorizer'),
+('Benefits Manager'),
+('Credit Counselor'),
+('Accountant'),
+('Bookkeeper'),
+('Accounting Analyst'),
+('Accounting Director'),
+('Accounts Payable/Receivable Clerk'),
+('Auditor'),
+('Budget Analyst'),
+('Controller'),
+('Financial Analyst'),
+('Finance Manager'),
+('Economist'),
+('Payroll Manager'),
+('Payroll Clerk'),
+('Financial Planner'),
+('Financial Services Representative'),
+('Finance Director'),
+('Commercial Loan Officer'),
+('Engineer'),
+('Mechanical Engineer'),
+('Civil Engineer'),
+('Electrical Engineer'),
+('Assistant Engineer'),
+('Chemical Engineer'),
+('Chief Engineer'),
+('Drafter'),
+('Engineering Technician'),
+('Geological Engineer'),
+('Biological Engineer'),
+('Maintenance Engineer'),
+('Mining Engineer'),
+('Nuclear Engineer'),
+('Petroleum Engineer'),
+('Plant Engineer'),
+('Production Engineer'),
+('Quality Engineer'),
+('Safety Engineer'),
+('Sales Engineer'),
+('Researcher'),
+('Research Assistant'),
+('Data Analyst'),
+('Business Analyst'),
+('Financial Analyst'),
+('Biostatistician'),
+('Title Researcher'),
+('Market Researcher'),
+('Title Analyst'),
+('Medical Researcher'),
+('Mentor'),
+('Tutor/Online Tutor'),
+('Teacher'),
+('Teaching Assistant'),
+('Substitute Teacher'),
+('Preschool Teacher'),
+('Test Scorer'),
+('Online ESL Instructor'),
+('Professor'),
+('Assistant Professor')
+GO
+
 
 -- STORED PROCEDURES AND SYNTHETIC TRANSACTIONS
 
@@ -274,7 +472,25 @@ SET @IndID = (SELECT GenderID
   FROM tblIndustry
   WHERE IndustryName = @IndName
 )
+GO
 
+CREATE PROCEDURE getEmployerID 
+@EMPNAME varchar(50),
+@EMPID INT OUTPUT
+AS
+SET @EMPID = (SELECT EmployerID
+   FROM tblEmployer
+   WHERE EmployerName = @EMPNAME)
+GO
+
+
+CREATE PROCEDURE getJobTypeID 
+@JTNAME varchar(50),
+@JTID INT OUTPUT
+AS
+SET @JTID = (SELECT JobTypeID
+   FROM tblJobType
+   WHERE JobTypeName = @JTNAME)
 GO
  
 CREATE PROCEDURE getMemTypeID
@@ -500,7 +716,7 @@ WHILE @RUN > 0
 		SET @Fna = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
 		SET @Lna = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
 		SET @Stary = (SELECT GETDATE() - RAND()*1000)
-		SET @Eny = (SELECT DATEADD(D, 14, @Stary)) -- (SELECT GETDATE() - RAND()*100)
+		SET @Eny = (SELECT DATEADD(D, RAND()*200, @Stary))
 		SET @Dobb = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
 		SET @MembTypee = (SELECT MembershipTypeName FROM tblMembershipType WHERE MembershipTypeID = @RANDMemType)
 		IF @Fna IS NULL OR @Lna  IS NULL OR @Stary IS NULL
@@ -696,8 +912,7 @@ WHILE @RUN > 0
 		SET @Job_ID = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblJob) AS INT)))
 		SET @Status_ID =  (SELECT FLOOR(RAND() * 3)+1) -- Select random 1 to 3
 		SET @StartDate = (SELECT GETDATE() - RAND()*1000)
-		SET @EndDate =  (SELECT DATEADD(DAY, 14, @StartDate))
-
+		SET @EndDate =  (SELECT DATEADD(D, RAND()*200, @StartDate))
 		SET @JobTitle = (SELECT JobTitle FROM tblJob WHERE JobID = @Job_ID)
 		SET @JobTypeName = (SELECT JobTypeName FROM tblJobType JT JOIN tblJob J ON JT.JobTypeID = J.JobTypeID WHERE J.JobID = @Job_ID)
 		SET @LevelName = (SELECT LevelName FROM tblLevel L JOIN tblJob J ON L.LevelID = J.LevelID WHERE J.JobID = @Job_ID)
@@ -883,7 +1098,7 @@ DECLARE @StartD DATE, @EndD DATE, @F_Name VARCHAR(50), @L_Name VARCHAR(50),
 
 WHILE @RUN > 0
 	BEGIN
-		SET @RANDUser = (SELECT LEFT(CAST(RAND()*1000 AS INT), 3))
+		SET @RANDUser = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblUser) AS INT), 3))
 		SET @RANDSeekName = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
 		SET @F_Name = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
 		SET @L_Name = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
@@ -1127,9 +1342,10 @@ ALTER TABLE tblUserJob with nocheck
 ADD CONSTRAINT CK_NoClosedJobApp
 CHECK (dbo.xuanry_fn_NoClosedJobApp() = 0)
 GO
+-- alter table tblUserJob drop constraint CK_NoClosedJobApp
 
 -- 5. All US software engineer positions has salary > 80k
-CREATE FUNCTION xuanry_fn_sde80k()
+ALTER FUNCTION xuanry_fn_sde80k()
 RETURNS INTEGER
 AS
 BEGIN
@@ -1138,8 +1354,9 @@ BEGIN
     FROM tblJob J
         JOIN tblJobLocation JL ON JL.JobID = J.JobID
         JOIN tblLocation L ON L.LocationID = JL.LocationID
+        JOIN tblPosition P ON P.PositionID = J.PositionID
     WHERE L.Country = 'USA' 
-        AND J.Salary <= 80000)
+        AND J.Salary <= 80000 AND P.PositionName = 'Software Engineer')
 BEGIN
         SET @RET = 1
     END
@@ -1151,8 +1368,9 @@ ALTER TABLE tblJob with nocheck
 ADD CONSTRAINT CK_NoSde80k
 CHECK (dbo.xuanry_fn_sde80k() = 0)
 GO
+-- alter table tblJob drop CONSTRAINT CK_NoSde80k
 
--- 6. Age <18 cannot apply to jobs -- cannot run after change
+-- 6. Age <18 cannot apply to jobs
 GO
 ALTER FUNCTION ageUnder18noJob()
 RETURNS INTEGER
@@ -1165,7 +1383,7 @@ DECLARE @RET INT = 0
             JOIN tblUserJob UJ ON U.UserID = UJ.UserID
             JOIN tblJOB J ON UJ.JobID = J.JobID
             JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
-        WHERE U.UserDOB < DateADD(Year, -18, GETDATE())
+        WHERE U.UserDOB > DateADD(Year, -18, GETDATE())
             AND JT.JobTypeName = 'Full-time' OR JT.JobTypeName ='Part-time' 
             OR JT.JobTypeName = 'Contract' OR JT.JobTypeName = 'Seasonal'
         )
@@ -1178,9 +1396,10 @@ ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT SorryTooYoung18job
 CHECK (dbo.ageUnder18noJob() = 0)
 GO
+-- alter table tblUserJob drop constraint SorryTooYoung18job
 
 -- 7. no one over age 24 can apply to internships
-CREATE FUNCTION ageOver24noInternshipUhh()
+ALTER FUNCTION ageOver24noInternshipUhh()
 RETURNS INTEGER
 AS
 BEGIN 
@@ -1191,9 +1410,8 @@ DECLARE @RET INT = 0
             JOIN tblUserJob UJ ON U.UserID = UJ.UserID
             JOIN tblJOB J ON UJ.JobID = J.JobID
             JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
-        WHERE U.UserDOB < DateADD(Year, -18, GETDATE())
-            AND JT.JobTypeName = 'Full-time' OR JT.JobTypeName ='Part-time' 
-            OR JT.JobTypeName = 'Contract' OR JT.JobTypeName = 'Seasonal'
+        WHERE U.UserDOB < DateADD(Year, -24, GETDATE())
+            AND JT.JobTypeName = 'Internship'
         )
     SET @RET = 1
     RETURN @RET
@@ -1204,6 +1422,7 @@ ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT ageOver24noInternshipPLEASE
 CHECK (dbo.ageOver24noInternshipUhh() = 0) 
 GO
+-- alter table tblUserJob drop constraint ageOver24noInternshipPLEASE
 
 -- 8. Any job higher than mid level cannot be part-time or intern or apprenticeship
 CREATE FUNCTION no_partTime_mid_level_higher()
@@ -1228,6 +1447,7 @@ ALTER TABLE tblJob WITH NOCHECK
 ADD CONSTRAINT Mid_Level_Higher_JobType_Restriction
 CHECK (dbo.no_partTime_mid_level_higher() = 0)
 GO
+-- alter table tblJob drop CONSTRAINT Mid_Level_Higher_JobType_Restriction
 
 -- 9. One user cannot apply to same job twice (user job)
 ALTER TABLE tblUserJob ADD CONSTRAINT no_duplicate_application UNIQUE (UserID, JobID);
@@ -1462,7 +1682,7 @@ GO
 -- COMPLEX QUERIES
 USE INFO430_Proj_08
 
--- Complex query: rank the top 10 industries by the number of OPEN job postings 
+-- 1. Complex query: rank the top 10 industries by the number of OPEN job postings 
 WITH
     CTE_TOP_IND_POSTING(IndustryID, IndustryName, RankingPosting)
     AS
@@ -1496,7 +1716,7 @@ CREATE VIEW TOP_IND_POSTING AS (
     )
 GO
 
--- Complex query: rank the companies with the highest average pay
+-- 2. Complex query: rank the companies with the highest average pay
 WITH
     CTE_TOP_EMP_SAL(EmployerID, EmployerName, AvgSalary, RankingSalary)
     AS
@@ -1522,7 +1742,7 @@ CREATE VIEW TOP_EMP_SAL AS (
 GO
 
 
--- Complex query: rank the companies with the highest average pay for intership
+-- 3. Complex query: rank the companies with the highest average pay for intership
 WITH
     CTE_TOP_EMP_SAL_INTERN(EmployerID, EmployerName, AvgSalary, RankingSalary)
     AS
@@ -1550,3 +1770,188 @@ CREATE VIEW TOP_EMP_SAL_INTERN AS (
         GROUP BY E.EmployerID, E.EmployerName
     )
 GO
+
+-- 4. Average Salary Job Type
+WITH
+    CTE_TOP_SALARY_JOBTYPE(JobTypeID, JobTypeName, AvgSalary, RankingSalary)
+    AS
+    (
+        SELECT JT.JobTypeID, JT.JobTypeName, SUM(J.Salary)/COUNT(J.JobID) AS AvgSalary,
+            RANK() OVER (ORDER BY SUM(J.Salary)/COUNT(J.JobID) DESC) AS RankingPosting
+        FROM tblJobType JT
+            JOIN tblJob J ON JT.JobTypeID = J.JobTypeID
+        GROUP BY JT.JobTypeID, JT.JobTypeName
+    )
+SELECT JobTypeID, JobTypeName, AvgSalary, RankingSalary
+FROM CTE_TOP_SALARY_JOBTYPE
+ORDER BY RankingSalary
+GO
+
+CREATE VIEW TOP_SALARY_JOBTYPE AS (
+        SELECT JT.JobTypeID, JT.JobTypeName, SUM(J.Salary)/COUNT(J.JobID) AS AvgSalary,
+            RANK() OVER (ORDER BY SUM(J.Salary)/COUNT(J.JobID) DESC) AS RankingPosting
+        FROM tblJobType JT
+            JOIN tblJob J ON JT.JobTypeID = J.JobTypeID
+        GROUP BY JT.JobTypeID, JT.JobTypeName
+    )
+GO
+
+
+-- 5. User who started a membership in the last month is active member, otherwise is nonactive member
+SELECT (CASE
+        WHEN StartDate > DATEADD(D, -90, GETDATE())
+            THEN 'Active'
+        ELSE 'Non-active'
+        END) AS labelOfActive, COUNT(UserID) AS NumberOfUsers
+FROM
+(SELECT U.UserID, U.UserFname, U.UserLname, StartDate AS StartDate
+    FROM tblUser U
+    JOIN tblMembership M ON M.UserID = U.UserID
+    GROUP BY U.UserID, U.UserFname, U.UserLname, M.StartDate) AS tempTable
+GROUP BY (CASE
+    WHEN StartDate > DATEADD(D, -90, GETDATE())
+        THEN 'Active'
+    ELSE 'Non-active'
+    END)
+GO
+
+-- 6. Rank the 10 users that applied to the most number of jobs
+WITH CTE_USER_APPLIED_JOBS(UserID, UserFname, UserLname, applied_jobs, RankingPosting)
+    AS
+    (
+        SELECT U.UserID, U.UserFname, U.UserLname, COUNT(UJ.JobID) AS applied_jobs,
+            RANK() OVER (ORDER BY COUNT(UJ.JobID) DESC) AS RankingPosting
+        FROM tblUser U
+            JOIN tblUserSeekingStatus USS ON U.UserID = USS.UserID
+            JOIN tblSeekingStatus SS ON USS.SeekingStatusID = SS.SeekingStatusID
+            JOIN tblUserJob UJ ON U.UserID = UJ.UserID
+        WHERE SS.SeekingStatusName = 'Open to work'
+        GROUP BY U.UserID, U.UserFname, U.UserLname
+    )
+SELECT UserID, UserFname, UserLname, applied_jobs, RankingPosting
+FROM CTE_USER_APPLIED_JOBS
+WHERE RankingPosting <= 10
+ORDER BY RankingPosting
+GO
+
+CREATE VIEW CTE_USER_APPLIED_JOBS AS
+    (
+        SELECT U.UserID, U.UserFname, U.UserLname, COUNT(UJ.JobID) AS applied_jobs,
+            RANK() OVER (ORDER BY COUNT(UJ.JobID) DESC) AS RankingPosting
+        FROM tblUser U
+            JOIN tblUserSeekingStatus USS ON U.UserID = USS.UserID
+            JOIN tblSeekingStatus SS ON USS.SeekingStatusID = SS.SeekingStatusID
+            JOIN tblUserJob UJ ON U.UserID = UJ.UserID
+        WHERE SS.SeekingStatusName = 'Open to work'
+        GROUP BY U.UserID, U.UserFname, U.UserLname
+    )
+GO
+
+
+-- 7. Calculate the 33 to 66 percentile of cities by their average salaries.
+WITH
+    CTE_Cities_Salary(City, avgSalary, nTilePosting)
+    AS
+    (
+        SELECT L.City, SUM(J.Salary) / COUNT(JL.JobID) AS avgSalary,
+            NTILE(100) OVER (ORDER BY (SUM(J.Salary) / COUNT(JL.JobID)) DESC) AS nTilePosting
+        FROM tblLocation L 
+            JOIN tblJobLocation JL ON L.LocationID = JL.LocationID
+            JOIN tblJob J ON JL.JobID = J.JobID
+        GROUP BY L.City
+    )
+SELECT City, avgSalary, nTilePosting
+FROM CTE_Cities_Salary
+WHERE nTilePosting BETWEEN 33 AND 66
+ORDER BY nTilePosting
+GO
+
+CREATE VIEW CTE_Cities_Salary AS
+    (
+        SELECT L.City, SUM(J.Salary) / COUNT(JL.JobID) AS avgSalary,
+            NTILE(100) OVER (ORDER BY (SUM(J.Salary) / COUNT(JL.JobID)) DESC) AS nTilePosting
+        FROM tblLocation L 
+            JOIN tblJobLocation JL ON L.LocationID = JL.LocationID
+            JOIN tblJob J ON JL.JobID = J.JobID
+        GROUP BY L.City
+    )
+GO
+
+
+USE INFO430_Proj_08
+
+-- 8. FIND THE TOP INDUSTRIES BY SUM_SALARY OF ENTRY LEVEL JOBS
+WITH CTE_INDUSTRIES_BY_SUM_SALARY_OF_ENTRY_LEVEL_JOBS
+AS (
+	SELECT I.IndustryName, SUM(J.Salary) AS Compensaton_Sum
+	FROM tblIndustry I
+		JOIN tblEmployer E ON I.IndustryID = E.IndustryID
+		JOIN tblJob J ON E.EmployerID = J.EmployerID
+		JOIN tblLevel L ON J.LevelID = L.LevelID
+	WHERE L.LevelName = 'Entry-level'
+	GROUP BY I.IndustryName)
+SELECT IndustryName, Compensaton_Sum
+FROM CTE_INDUSTRIES_BY_SUM_SALARY_OF_ENTRY_LEVEL_JOBS
+ORDER BY Compensaton_Sum
+GO
+
+CREATE VIEW INDUSTRIES_BY_SUM_SALARY_OF_ENTRY_LEVEL_JOBS AS (
+	SELECT I.IndustryName, SUM(J.Salary) AS Compensaton_Sum
+	FROM tblIndustry I
+		JOIN tblEmployer E ON I.IndustryID = E.IndustryID
+		JOIN tblJob J ON E.EmployerID = J.EmployerID
+		JOIN tblLevel L ON J.LevelID = L.LevelID
+	WHERE L.LevelName = 'Entry-level'
+	GROUP BY I.IndustryName
+)
+
+GO
+
+
+-- 9. FIND THE TOP 10 CXO JOBS BY SALARY IN INFORMATION TECHNOLOGY
+WITH CTE_TOP_10_CXO_JOBS_BY_SALARY_IN_INFORMATION_TECHNOLOGY
+AS (
+	SELECT TOP 10 J.JobTitle, J.Salary, P.PositionName
+	FROM tblJob J
+		JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+		JOIN tblIndustry I ON E.IndustryID = I.IndustryID
+		JOIN tblLevel L ON J.LevelID = L.LevelID
+		JOIN tblPosition P ON J.PositionID = P.PositionID
+	WHERE I.IndustryName = 'Information Technology' AND P.PositionName LIKE '%CHIEF%'
+	ORDER BY J.Salary DESC)
+SELECT JobTitle, Salary, PositionName
+FROM CTE_TOP_10_CXO_JOBS_BY_SALARY_IN_INFORMATION_TECHNOLOGY
+ORDER BY Salary
+GO
+
+
+CREATE VIEW TOP_10_CXO_JOBS_BY_SALARY_IN_INFORMATION_TECHNOLOGY AS (
+	SELECT TOP 10 J.JobTitle, J.Salary, P.PositionName
+	FROM tblJob J
+		JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+		JOIN tblIndustry I ON E.IndustryID = I.IndustryID
+		JOIN tblLevel L ON J.LevelID = L.LevelID
+		JOIN tblPosition P ON J.PositionID = P.PositionID
+	WHERE I.IndustryName = 'Information Technology' AND P.PositionName LIKE '%CHIEF%'
+	ORDER BY J.Salary DESC
+)
+GO
+
+
+-- MISCELLANEOUS: fix job title to not have '.' since it's breaking insertintouserjob
+DECLARE @CURREM VARCHAR(200), @CURRPOS INT, @RAND INT, @CURRJOB INT, @RUN INT, @MATCHPOS INT
+SET @RUN = (SELECT COUNT(*) FROM tblJob)
+WHILE @RUN > 0
+BEGIN
+   SET @CURRJOB = @RUN
+   SET @CURREM = (SELECT EmployerName FROM tblJob J JOIN tblEmployer E ON J.EmployerID = E.EmployerID AND J.JobID = @CURRJOB)
+   SET @CURRPOS = (SELECT P.PositionID FROM tblJob J JOIN tblPosition P ON J.PositionID = P.PositionID AND J.JobID = @CURRJOB)
+   SET @RAND = (CEILING(RAND() * 99999))
+   IF (@CURREM like '%.%')
+      SET @MATCHPOS = (SELECT CHARINDEX('.', @CURREM))
+      SET @CURREM = SUBSTRING(@CURREM, 0, (@MATCHPOS))
+   UPDATE tblJob 
+   SET JobTitle = CONCAT(@CURREM, '') + '-' + CONCAT(@CURRPOS,'') + '-' + CONCAT(@RAND,'')
+   WHERE JobID = @CURRJOB
+SET @RUN = @RUN - 1
+END

@@ -1098,13 +1098,13 @@ DECLARE @StartD DATE, @EndD DATE, @F_Name VARCHAR(50), @L_Name VARCHAR(50),
 
 WHILE @RUN > 0
 	BEGIN
-		SET @RANDUser = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblUser) AS INT), 3))
-		SET @RANDSeekName = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
+		SET @RANDUser = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblUser) + 1 AS INT), 4))
+		SET @RANDSeekName = (SELECT LEFT(CAST(RAND() * 2 + 1 AS INT), 3))
 		SET @F_Name = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
 		SET @L_Name = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
+        SET @Birthy = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
 		SET @StartD = (SELECT GETDATE() - RAND()*1000)
 		SET @EndD = (SELECT DATEADD(D, RAND()*200, @StartD))
-		SET @Birthy = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
 		SET @Seeking_Status_Name = (SELECT SeekingStatusName FROM tblSeekingStatus 
 									WHERE SeekingStatusID = @RANDSeekName)
 

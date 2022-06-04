@@ -1,6 +1,13 @@
 USE INFO430_Proj_08
+
+-- IMPORTANT --
+-- Code for reseeding tables (in case you need to repopulate, change 'tblUser' to name of the table)
+-- DBCC CHECKIDENT(tblUser, RESEED, 0)
  
--- EASY stored procedures
+
+
+-- GetID Stored Procedures
+
 CREATE PROCEDURE getUserTypeID
 @UserTypeN varchar(50),
 @UseTypID INT OUTPUT
@@ -8,6 +15,7 @@ AS
 SET @UseTypID = (SELECT UserTypeID
    FROM tblUserType
    WHERE UserTypeName = @UserTypeN)
+
 GO
  
 CREATE PROCEDURE getMemTypeID
@@ -17,11 +25,12 @@ AS
 SET @MemTyID = (SELECT MembershipTypeID
    FROM tblMembershipType
    WHERE MembershipTypeName = @Memmy)
+
 GO
- 
+
 CREATE PROCEDURE getGenderID
 @GendNam varchar(50),
-@Prononny varchar(50)
+@Prononny varchar(50),
 @GendID INT OUTPUT
 AS
 SET @GendID = (SELECT GenderID
@@ -29,22 +38,23 @@ SET @GendID = (SELECT GenderID
    WHERE GenderName = @GendNam
    AND Pronouns = @Prononny
 )
+
 GO
  
--- CREATE PROCEDURE getUserID -- Ran once, works!
--- @UserFNam varchar(50),
--- @UserLnam varchar(200),
--- @DOBBY DATE,
--- @Usy_ID INT OUTPUT
--- AS
--- SET @Usy_ID = (SELECT UserID
---    FROM tblUser
---    WHERE UserFname = @UserFNam
---    AND UserLname = @UserLnam
---    AND UserDOB = @DOBBY)
--- GO
+CREATE PROCEDURE getUserID
+@UserFNam varchar(50),
+@UserLnam varchar(200),
+@DOBBY DATE,
+@Usy_ID INT OUTPUT
+AS
+SET @Usy_ID = (SELECT UserID
+	FROM tblUser
+	WHERE UserFname = @UserFNam
+	AND UserLname = @UserLnam
+	AND UserDOB = @DOBBY)
+
+GO
  
--- EASY stored procedures
 CREATE PROCEDURE getLocationID
 @CityName varchar(50),
 @CountryName varchar(50),
@@ -54,7 +64,9 @@ SET @LocID = (SELECT LocationID
   FROM tblLocation
   WHERE City = @CityName
   AND Country = @CountryName)
+
 GO
+
 CREATE PROCEDURE getEmployerSizeID
 @EmpSizeName varchar(50),
 @EmpSizeID INT OUTPUT
@@ -62,7 +74,9 @@ AS
 SET @EmpSizeID = (SELECT EmployerSizeID
   FROM tblEmployerSize
   WHERE EmployerSizeName = @EmpSizeName)
+
 GO
+
 CREATE PROCEDURE getIndustryID
 @IndName varchar(50),
 @IndID INT OUTPUT
@@ -71,25 +85,7 @@ SET @IndID = (SELECT GenderID
   FROM tblIndustry
   WHERE IndustryName = @IndName
 )
-GO
- 
- 
--- Synthetic Tnx --
--- USE INFO430_Proj_08
- 
--- INSERT INTO tblUser (UserFname, UserLname, UserDOB)
--- SELECT CustomerFname, CustomerLname, DateOfBirth FROM PEEPS.dbo.tblCUSTOMER
--- select TOP 3 * FROM tblUser
- 
- 
--- GetID stored procedures
-CREATE PROCEDURE getUserTypeID
-@UserTypeN varchar(50),
-@UseTypID INT OUTPUT
-AS
-SET @UseTypID = (SELECT UserTypeID
-   FROM tblUserType
-   WHERE UserTypeName = @UserTypeN)
+
 GO
  
 CREATE PROCEDURE getMemTypeID
@@ -99,35 +95,75 @@ AS
 SET @MemTyID = (SELECT MembershipTypeID
    FROM tblMembershipType
    WHERE MembershipTypeName = @Memmy)
+
 GO
- 
-CREATE PROCEDURE getGenderID
-@GendNam varchar(50),
-@Prononny varchar(50)
-@GendID INT OUTPUT
+
+CREATE PROCEDURE getStatusID
+@StatusName varchar(50),
+@S_ID INTEGER OUTPUT
+
 AS
-SET @GendID = (SELECT GenderID
-   FROM tblGender
-   WHERE GenderName = @GendNam
-   AND Pronouns = @Prononny
-)
+SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
+
 GO
- 
-ALTER PROCEDURE getUserID -- Ran once, works!
-@UserFNam varchar(50),
-@UserLnam varchar(200),
-@DOBBY DATE,
-@Usy_ID INT OUTPUT
+
+CREATE PROCEDURE getRoleID
+@RName VARCHAR(50),
+@RID INTEGER OUTPUT
+
 AS
-SET @Usy_ID = (SELECT UserID
-   FROM tblUser
-   WHERE UserFname = @UserFNam
-   AND UserLname = @UserLnam
-   AND UserDOB = @DOBBY)
+SET @RID = (
+    SELECT RoleID
+    FROM tblRole
+    WHERE RoleName = @RName)
+GO
+
+
+CREATE PROCEDURE getJobID
+@JobTitle varchar(50),
+@JobTypeName varchar(50),
+@LevelName varchar(50),
+@EmployerName varchar(50),
+@PositionName varchar(50),
+@J_ID INTEGER OUTPUT
+
+AS
+SET @J_ID = (SELECT JobID FROM tblJob J
+	JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
+	JOIN tblLevel L ON J.LevelID = L.LevelID
+	JOIN tblPosition P ON J.PositionID = P.PositionID
+	JOIN tblEmployer E ON J.EmployerID = E.EmployerID
+	WHERE J.JobTitle = @JobTitle AND JT.JobTypeName = @JobTypeName AND L.LevelName = @LevelName AND E.EmployerName = @EmployerName AND P.PositionName = @PositionName)
+
+GO
+
+CREATE PROCEDURE jraygetUserID
+@UFname VARCHAR(50),
+@ULname VARCHAR(50),
+@UDOB DATE,
+@Userr_ID INTEGER OUTPUT
+AS
+SET @Userr_ID = (
+    SELECT UserID
+    FROM tblUser
+    WHERE UserFname = @UFname
+    AND UserLname = @ULname
+    AND UserDOB = @UDOB)
+
+GO
+
+CREATE PROCEDURE getSeekingStatusID
+@SeekSName VARCHAR(50),
+@Seek_ID INTEGER OUTPUT
+AS
+SET @Seek_ID = (
+    SELECT SeekingStatusID
+    FROM tblSeekingStatus
+    WHERE @SeekSName = SeekingStatusName)
+
 GO
  
- 
--- Synthetic Tnx User table
+-- Synthetic Tnx, Insert into tblUser
 CREATE PROCEDURE insertIntoUser
 @UsyTypeNam varchar(50),
 @GenNam varchar(50),
@@ -170,53 +206,50 @@ IF @@ERROR <> 0
    END
 ELSE
    COMMIT TRANSACTION T1
+
 GO
  
--- Add wrapper (part of syn tnx)
+-- Wrapper procedure for randomly populating user table
 ALTER PROCEDURE [dbo].[wrapperUser]
+@RUN INTEGER
 AS
 DECLARE @Firy varchar(50), @Lasy varchar(50), @Pronnys varchar(50), @Genny varchar(50),
-@Dobenie DATE, @UTypee varchar(50), @RUN INT, @RANDUserTypeID INT, @RANDGenderTypeID INT,
+@Dobenie DATE, @UTypee varchar(50), @RANDUserTypeID INT, @RANDGenderTypeID INT,
 @RANDUserID INT
-SET @RUN = (SELECT COUNT(*) FROM PEEPS.dbo.tblCUSTOMER)
+
 WHILE @RUN > 0
-BEGIN
-   SET @RANDUserTypeID = (SELECT LEFT(CAST(RAND() * 2 + 1 AS INT), 3))
-   SET @RANDGenderTypeID = (SELECT LEFT(CAST(RAND() * 3 + 1 AS INT), 3))
-   SET @RANDUserID = @RUN
-   SET @Firy = (SELECT CustomerFname FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
-   SET @Lasy = (SELECT CustomerLname FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
-   SET @Pronnys = (SELECT Pronouns FROM tblGender WHERE GenderID = @RANDGenderTypeID)
-   SET @Genny = (SELECT GenderName FROM tblGender WHERE GenderID = @RANDGenderTypeID)
-   SET @Dobenie = (SELECT DateOfBirth FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
-   SET @UTypee = (SELECT UserTypeName FROM tblUserType WHERE UserTypeID = @RANDUserTypeID)
-   -- PRINT(@RANDUserTypeID + ',' + @RANDGenderTypeID  + ',' +  @RANDUserID  + ',' +  @Firy + ',' +  
-   -- @Lasy + ',' +  @Pronnys + ',' +  @Genny + ',' +  @Dobenie + ',' +  @UTypee)
-   IF @Firy IS NULL OR @Lasy IS NULL OR @Pronnys IS NULL or @Genny IS NULL
-   or @Dobenie IS NULL OR @UTypee IS NULL
-   BEGIN
-       PRINT 'variables are null';
-       THROW 57694, 'variables cannot be null; process terminating', 1;
-   END
- 
-EXEC insertIntoUser
-@UsyTypeNam = @UTypee,
-@GenNam = @Genny,
-@Prons = @Pronnys,
-@UsyFnam = @Firy,
-@usyLnam = @Lasy,
-@UsDoby = @Dobenie
- 
-SET @RUN = @RUN - 1
-END
+	BEGIN
+		   SET @RANDUserTypeID = (SELECT LEFT(CAST(RAND() * 2 + 1 AS INT), 3))
+		   SET @RANDGenderTypeID = (SELECT LEFT(CAST(RAND() * 3 + 1 AS INT), 3))
+		   SET @RANDUserID = @RUN
+		   SET @Firy = (SELECT CustomerFname FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
+		   SET @Lasy = (SELECT CustomerLname FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
+		   SET @Pronnys = (SELECT Pronouns FROM tblGender WHERE GenderID = @RANDGenderTypeID)
+		   SET @Genny = (SELECT GenderName FROM tblGender WHERE GenderID = @RANDGenderTypeID)
+		   SET @Dobenie = (SELECT DateOfBirth FROM PEEPS.dbo.tblCUSTOMER WHERE CustomerID = @RANDUserID)
+		   SET @UTypee = (SELECT UserTypeName FROM tblUserType WHERE UserTypeID = @RANDUserTypeID)
 
--- execute insert User
-EXEC [wrapperUser] -- error b/c user has null values
+		   IF @Firy IS NULL OR @Lasy IS NULL OR @Pronnys IS NULL or @Genny IS NULL
+		   or @Dobenie IS NULL OR @UTypee IS NULL
+		   BEGIN
+			   PRINT 'variables are null';
+			   THROW 57694, 'variables cannot be null; process terminating', 1;
+		   END
+ 
+		EXEC insertIntoUser
+		@UsyTypeNam = @UTypee,
+		@GenNam = @Genny,
+		@Prons = @Pronnys,
+		@UsyFnam = @Firy,
+		@usyLnam = @Lasy,
+		@UsDoby = @Dobenie
+ 
+		SET @RUN = @RUN - 1
+	END
+
 GO
--- SELECT * FROM tblUser
 
- 
--- Synthetic Tnx Membership table --
+-- Synthetic Tnx, Insert into tblMembership
 ALTER PROCEDURE insertIntoMembership
 @Starty DATE,
 @Enddy DATE,
@@ -261,80 +294,47 @@ IF @@ERROR <> 0
    END
 ELSE
    COMMIT TRANSACTION T1
+
 GO
- 
+
+-- Wrapper procedure for randomly populating tblMembership
 ALTER PROCEDURE [dbo].[wrapperMembership]
+@RUN INTEGER
 AS
 DECLARE @Stary VARCHAR(50), @Eny VARCHAR(50), @Fna VARCHAR(50), @Lna VARCHAR(50),
-@Dobb DATE, @MembTypee VARCHAR(100), @RUN INT, @RANDUser FLOAT, @RANDMemType FLOAT
-SET @RUN = (SELECT COUNT(*) FROM tblUser)
+@Dobb DATE, @MembTypee VARCHAR(100), @RANDUser FLOAT, @RANDMemType FLOAT
+
 WHILE @RUN > 0
-BEGIN
-SET @RANDUser = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT)))
-SET @RANDMemType = (SELECT FLOOR(CAST(RAND()*2 + 1 AS INT)))
-SET @Fna = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
-SET @Lna = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
-SET @Stary = (SELECT GETDATE() - RAND()*1000)
-SET @Eny = (SELECT DATEADD(D, 14, @Stary)) -- (SELECT GETDATE() - RAND()*100)
-SET @Dobb = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
-SET @MembTypee = (SELECT MembershipTypeName FROM tblMembershipType WHERE MembershipTypeID = @RANDMemType)
-IF @Fna IS NULL OR @Lna  IS NULL OR @Stary IS NULL
-   OR @Eny IS NULL OR @Dobb IS NULL OR @MembTypee IS NULL
-   BEGIN
-      PRINT 'Variables are null';
-      THROW 55656, 'variables cannot be NULL; process is terminating', 1;
-   END
+	BEGIN
+		SET @RANDUser = (SELECT FLOOR(CAST(RAND()* (SELECT COUNT(*) FROM tblUser) AS INT)))
+		SET @RANDMemType = (SELECT FLOOR(CAST(RAND()*2 + 1 AS INT)))
+		SET @Fna = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
+		SET @Lna = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
+		SET @Stary = (SELECT GETDATE() - RAND()*1000)
+		SET @Eny = (SELECT DATEADD(D, 14, @Stary)) -- (SELECT GETDATE() - RAND()*100)
+		SET @Dobb = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
+		SET @MembTypee = (SELECT MembershipTypeName FROM tblMembershipType WHERE MembershipTypeID = @RANDMemType)
+		IF @Fna IS NULL OR @Lna  IS NULL OR @Stary IS NULL
+		   OR @Eny IS NULL OR @Dobb IS NULL OR @MembTypee IS NULL
+		   BEGIN
+			  PRINT 'Variables are null';
+			  THROW 55656, 'variables cannot be NULL; process is terminating', 1;
+		   END
  
-EXEC insertIntoMembership
-@Starty = @Stary,
-@Enddy = @Eny,
-@Fnamm = @Fna,
-@Lnamm = @Lna,
-@Dobie = @Dobb,
-@MembType = @MembTypee
+		EXEC insertIntoMembership
+		@Starty = @Stary,
+		@Enddy = @Eny,
+		@Fnamm = @Fna,
+		@Lnamm = @Lna,
+		@Dobie = @Dobb,
+		@MembType = @MembTypee
  
-SET @RUN = @RUN - 1
-END
-
-SELECT COUNT(*) FROM tblUser
-SELECT * FROM tblMembership
-EXEC [wrapperMembership]
-SELECT COUNT(*) FROM tblMembership
-GO
-
---  Jacob Code, Populating JobStatus 
-
--- Get StatusID Procedure
-CREATE PROCEDURE getStatusID
-@StatusName varchar(50),
-@S_ID INTEGER OUTPUT
-
-AS
-SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
+		SET @RUN = @RUN - 1
+	END
 
 GO
 
--- Get JobID Procedure
-CREATE PROCEDURE getJobID
-@JobTitle varchar(50),
-@JobTypeName varchar(50),
-@LevelName varchar(50),
-@EmployerName varchar(50),
-@PositionName varchar(50),
-@J_ID INTEGER OUTPUT
-
-AS
-SET @J_ID = (SELECT JobID FROM tblJob J
-	JOIN tblJobType JT ON J.JobTypeID = JT.JobTypeID
-	JOIN tblLevel L ON J.LevelID = L.LevelID
-	JOIN tblPosition P ON J.PositionID = P.PositionID
-	JOIN tblEmployer E ON J.EmployerID = E.EmployerID
-	WHERE J.JobTitle = @JobTitle AND JT.JobTypeName = @JobTypeName AND L.LevelName = @LevelName AND E.EmployerName = @EmployerName AND P.PositionName = @PositionName)
-
-GO
-
-
--- Synthetic Tnx to Insert into Employer --
+-- Synthetic Tnx, Insert into tblEmployer
 CREATE PROCEDURE insertIntoEmployer
 @EmpName varchar(50),
 @EmpDescr varchar(200),
@@ -391,9 +391,9 @@ ELSE
    COMMIT TRANSACTION T1
 GO
 
--- DBCC CHECKIDENT(tblUser, RESEED, 0)
-
+-- Wrapper procedure for randomly populating tblEmployer
 ALTER PROCEDURE [dbo].[wrapperEmployer]
+@RUN INTEGER
 AS
 DECLARE @EName varchar(50),
 @EDescr varchar(200),
@@ -401,52 +401,41 @@ DECLARE @EName varchar(50),
 @CoName varchar(200),
 @ESizeName varchar(50),
 @IName varchar(50), 
-@RANDLoc INT, @RANDEmpSize INT, @RANDInd INT, @RUN INT
-SET @RUN = (SELECT COUNT(*) FROM PEEPS.dbo.Businesses)
-WHILE @RUN > 0
-BEGIN
-    SET @RANDLoc = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblLocation) + 1 AS INT), 3))
-    SET @RANDEmpSize = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblEmployerSize) + 1 AS INT), 3))
-    SET @RANDInd = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblIndustry) + 1 AS INT), 3))
-    SET @EName = (SELECT BusinessName FROM PEEPS.dbo.Businesses WHERE BusinessID = @RUN)
-    SET @EDescr = (SELECT Email FROM PEEPS.dbo.Businesses WHERE BusinessID = @RUN)
-    SET @CiName = (SELECT City FROM tblLocation WHERE LocationID = @RANDLoc)
-    SET @CoName = (SELECT Country FROM tblLocation WHERE LocationID = @RANDLoc)
-    SET @ESizeName = (SELECT EmployerSizeName FROM tblEmployerSize WHERE EmployerSizeID = @RANDEmpSize)
-    SET @IName = (SELECT IndustryName FROM tblIndustry WHERE IndustryID = @RANDInd)
-    
-    IF @EName IS NULL OR @EDescr IS NULL OR @CiName IS NULL OR 
-    @CoName IS NULL OR @ESizeName IS NULL OR @IName IS NULL
-    BEGIN
-        PRINT 'Variables are null';
-        THROW 55656, 'variables cannot be NULL; process is terminating', 1;
-    END
+@RANDLoc INT, @RANDEmpSize INT, @RANDInd INT
 
-    EXEC insertIntoEmployer
-    @EmpName = @EName,
-    @EmpDescr = @EDescr,
-    @CityName = @CiName,
-    @CountryName = @CoName,
-    @EmpSizeName = @ESizeName,
-    @IName = @IName
+WHILE @RUN > 0
+	BEGIN
+
+		SET @RANDLoc = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblLocation) + 1 AS INT), 3))
+		SET @RANDEmpSize = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblEmployerSize) + 1 AS INT), 3))
+		SET @RANDInd = (SELECT LEFT(CAST(RAND()*(SELECT COUNT(*) FROM tblIndustry) + 1 AS INT), 3))
+		SET @EName = (SELECT BusinessName FROM PEEPS.dbo.Businesses WHERE BusinessID = @RUN)
+		SET @EDescr = (SELECT Email FROM PEEPS.dbo.Businesses WHERE BusinessID = @RUN)
+		SET @CiName = (SELECT City FROM tblLocation WHERE LocationID = @RANDLoc)
+		SET @CoName = (SELECT Country FROM tblLocation WHERE LocationID = @RANDLoc)
+		SET @ESizeName = (SELECT EmployerSizeName FROM tblEmployerSize WHERE EmployerSizeID = @RANDEmpSize)
+		SET @IName = (SELECT IndustryName FROM tblIndustry WHERE IndustryID = @RANDInd)
+    
+		IF @EName IS NULL OR @EDescr IS NULL OR @CiName IS NULL OR 
+		@CoName IS NULL OR @ESizeName IS NULL OR @IName IS NULL
+		BEGIN
+			PRINT 'Variables are null';
+			THROW 55656, 'variables cannot be NULL; process is terminating', 1;
+		END
+
+		EXEC insertIntoEmployer
+		@EmpName = @EName,
+		@EmpDescr = @EDescr,
+		@CityName = @CiName,
+		@CountryName = @CoName,
+		@EmpSizeName = @ESizeName,
+		@IName = @IName
 
     SET @RUN = @RUN - 1
     END
 GO
 
---  Jacob Code, Populating JobStatus 
-
--- Get StatusID Procedure
-CREATE PROCEDURE getStatusID
-@StatusName varchar(50),
-@S_ID INTEGER OUTPUT
-
-AS
-SET @S_ID = (SELECT StatusID FROM tblStatus S WHERE S.StatusName = @StatusName)
-
-GO
-
--- Procedure for inserting specific rows into JobStatus
+-- Procedure for inserting into JobStatus table
 ALTER PROCEDURE insertIntoJobStatus
 @Job_Title varchar(50),
 @Job_Type_Name varchar(50),
@@ -497,7 +486,7 @@ ELSE
 
 GO
 
--- Procedure for populating JobStatus
+-- Wrapper procedure for randomly populating tblJobStatus
 ALTER PROCEDURE [dbo].[wrapperJobStatus]
 @RUN INTEGER
 AS
@@ -547,7 +536,6 @@ WHILE @RUN > 0
 	END
 GO
 
--- JobLocation Population Code
 
 ALTER PROCEDURE generateJobLocation
 @Job_Title varchar(50),
@@ -602,8 +590,7 @@ ELSE
 GO
 
 
--- Procedure for populating JobLocation with locationID from Employer table
-
+-- Wrapper procedure for randomly populating tblJobLocation
 ALTER PROCEDURE [dbo].[wrapperJobLocation]
 @Run INTEGER
 AS
@@ -651,31 +638,7 @@ WHILE @RUN > 0
 	END
 GO
 
--- Synthetic Tnx for tblUserSeekingStatus
-
-CREATE PROCEDURE jraygetUserID
-@UFname VARCHAR(50),
-@ULname VARCHAR(50),
-@UDOB DATE,
-@Userr_ID INTEGER OUTPUT
-AS
-SET @Userr_ID = (
-    SELECT UserID
-    FROM tblUser
-    WHERE UserFname = @UFname
-    AND UserLname = @ULname
-    AND UserDOB = @UDOB)
-GO
-
-CREATE PROCEDURE getSeekingStatusID
-@SeekSName VARCHAR(50),
-@Seek_ID INTEGER OUTPUT
-AS
-SET @Seek_ID = (
-    SELECT SeekingStatusID
-    FROM tblSeekingStatus
-    WHERE @SeekSName = SeekingStatusName)
-GO
+-- Synthetic Tnx for inserting into tblUserSeekingStatus
 
 ALTER PROCEDURE insertIntoUserSeekingStatus
 @Start_Date DATE,
@@ -723,61 +686,49 @@ ELSE
 GO
 
 ALTER PROCEDURE [dbo].[wrapperUserSeekingStatus]
+@RUN INTEGER
 AS
 DECLARE @StartD DATE, @EndD DATE, @F_Name VARCHAR(50), @L_Name VARCHAR(50), 
-        @Birthy DATE, @Seeking_Status_Name VARCHAR(50), @RUN INT, @RANDUser FLOAT, 
+        @Birthy DATE, @Seeking_Status_Name VARCHAR(50), @RANDUser FLOAT, 
         @RANDSeekName FLOAT
-SET @RUN = (SELECT COUNT(*) FROM tblUser)
+
 WHILE @RUN > 0
-BEGIN
-SET @RANDUser = (SELECT LEFT(CAST(RAND()*1000 AS INT), 3))
-SET @RANDSeekName = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
-SET @F_Name = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
-SET @L_Name = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
-SET @StartD = (SELECT GETDATE() - RAND()*1000)
-SET @EndD = (SELECT DATEADD(D, RAND()*200, @StartD))
-SET @Birthy = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
-SET @Seeking_Status_Name = (SELECT SeekingStatusName FROM tblSeekingStatus 
-                            WHERE SeekingStatusID = @RANDSeekName)
+	BEGIN
+		SET @RANDUser = (SELECT LEFT(CAST(RAND()*1000 AS INT), 3))
+		SET @RANDSeekName = (SELECT LEFT(CAST(RAND()*2 + 1 AS INT), 3))
+		SET @F_Name = (SELECT UserFname FROM tblUser WHERE UserID = @RANDUser)
+		SET @L_Name = (SELECT UserLname FROM tblUser WHERE UserID = @RANDUser)
+		SET @StartD = (SELECT GETDATE() - RAND()*1000)
+		SET @EndD = (SELECT DATEADD(D, RAND()*200, @StartD))
+		SET @Birthy = (SELECT UserDOB FROM tblUser WHERE UserID = @RANDUser)
+		SET @Seeking_Status_Name = (SELECT SeekingStatusName FROM tblSeekingStatus 
+									WHERE SeekingStatusID = @RANDSeekName)
 
-IF @StartD IS NULL OR
-   @EndD IS NULL OR
-   @F_Name IS NULL OR
-   @L_Name IS NULL OR
-   @Birthy IS NULL OR
-   @Seeking_Status_Name IS NULL
-    BEGIN 
-        PRINT 'Variables are null';
-        THROW 55656, 'variables cannot be NULL; process is terminating', 1;
-    END
+		IF @StartD IS NULL OR
+		   @EndD IS NULL OR
+		   @F_Name IS NULL OR
+		   @L_Name IS NULL OR
+		   @Birthy IS NULL OR
+		   @Seeking_Status_Name IS NULL
+			BEGIN 
+				PRINT 'Variables are null';
+				THROW 55656, 'variables cannot be NULL; process is terminating', 1;
+			END
 
-EXEC insertIntoUserSeekingStatus
-@Start_Date = @StartD,
-@End_Date = @EndD,
-@User_Fname = @F_name,
-@User_Lname = @L_Name,
-@User_DOB = @Birthy,
-@SeekStatus_Name = @Seeking_Status_Name
+		EXEC insertIntoUserSeekingStatus
+		@Start_Date = @StartD,
+		@End_Date = @EndD,
+		@User_Fname = @F_name,
+		@User_Lname = @L_Name,
+		@User_DOB = @Birthy,
+		@SeekStatus_Name = @Seeking_Status_Name
 
-SET @RUN = @RUN - 1
-END
+		SET @RUN = @RUN - 1
+	END
 
-EXEC wrapperUserSeekingStatus
 
 
 ----- Synthetic Tnx for UserJob -------
-
-CREATE PROCEDURE getRoleID
-@RName VARCHAR(50),
-@RID INTEGER OUTPUT
-
-AS
-SET @RID = (
-    SELECT RoleID
-    FROM tblRole
-    WHERE RoleName = @RName)
-GO
-
 
 CREATE PROCEDURE insertIntoUserJob
 @UserF VARCHAR(50),
@@ -853,9 +804,9 @@ GO
 
 -- Procedure for populating userjob
 ALTER PROCEDURE [dbo].[wrapperUserJob]
+@RUN INTEGER
 AS
-DECLARE @J_ID INTEGER, @U_ID INTEGER, @R_ID INTEGER, @RUN INTEGER
-SET @RUN = (SELECT COUNT(*) FROM tblUser)
+DECLARE @J_ID INTEGER, @U_ID INTEGER, @R_ID INTEGER
 
 WHILE @RUN > 0
 	BEGIN
@@ -868,10 +819,11 @@ WHILE @RUN > 0
 				PRINT 'A variable is NULL';
 				THROW 55658, 'Variables cannot be NULL, process terminating', 1;
 			END
+
         INSERT INTO tblUserJob(JobID, UserID, RoleID)
         VALUES(@J_ID, @U_ID,@R_ID)
+
         SET @RUN = @RUN - 1
-END
+	END
 GO
 
-EXEC wrapperUserJob

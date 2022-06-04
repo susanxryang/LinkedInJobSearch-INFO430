@@ -180,7 +180,7 @@ BEGIN
 END
 GO
 
-ALTER TABLE tblUserJob with nocheck
+ALTER TABLE tblJob with nocheck
 ADD CONSTRAINT CK_NoSde80k
 CHECK (dbo.xuanry_fn_sde80k() = 0)
 GO
@@ -264,7 +264,7 @@ DECLARE @RET INT = 0
 END
 GO
 
-ALTER TABLE tblJob WITH NOCHECK
+ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT SorryTooYoung18job
 CHECK (dbo.ageUnder18noJob() = 0)
 GO
@@ -290,7 +290,7 @@ DECLARE @RET INT = 0
 END
 GO
 
-ALTER TABLE tblJOB WITH NOCHECK
+ALTER TABLE tblUserJob WITH NOCHECK
 ADD CONSTRAINT ageOver24noInternshipPLEASE
 CHECK (dbo.ageOver24noInternshipUhh() = 0) 
 GO
@@ -357,7 +357,7 @@ GO
 ALTER TABLE tblEmployer
 ADD TotalNumInternshipsPerCompany AS 
 (dbo.numInternshipsByCompany(EmployerID)) -- not dbo.
-
+GO
 
 -- Business Rules
 -- 1. Any job higher than mid level cannot be part-time or intern or apprenticeship
@@ -385,7 +385,6 @@ CHECK (dbo.no_partTime_mid_level_higher() = 0)
 GO
 
 -- 2. One user cannot apply to same job twice (user job)
-
 
 ALTER TABLE tblUserJob ADD CONSTRAINT no_duplicate_application UNIQUE (UserID, JobID);
 GO

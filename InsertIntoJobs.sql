@@ -1,4 +1,8 @@
 use INFO430_Proj_08
+-- scripting index
+SELECT * FROM tblJobStatus
+
+
 select * from tblMembership
 
 -- populating location
@@ -202,6 +206,7 @@ VALUES ('Marketing Specialist'),
 ('Assistant Professor')
 GO
 
+
 CREATE PROCEDURE getJobID 
 @JobTitle varchar(100),
 @JobID INT OUTPUT
@@ -287,7 +292,6 @@ AS
 DECLARE
 @Title varchar(255),
 @RANDSal INT,
-@RANDNumApp INT,
 @RANDType INT,
 @RANDLev INT, 
 @RANDEmp varchar(50), 
@@ -300,7 +304,6 @@ WHILE @RUN > 0
 	BEGIN
 
 		SET @RANDSal = (SELECT CEILING(20000 + RAND() * 100000))
-		SET @RANDNumApp = (SELECT CEILING(RAND() * 100))
 		SET @RANDType = (SELECT CEILING(RAND() * (SELECT COUNT(*) FROM tblJobType)))
 		SET @RANDLev = (SELECT CEILING(RAND() * (SELECT COUNT(*) FROM tblLevel)))
 		SET @RANDEmpID = (SELECT CEILING(RAND() * (SELECT COUNT(*) FROM tblEmployer)))
@@ -309,9 +312,9 @@ WHILE @RUN > 0
 		SET @Title = CONCAT(@RANDEmp, '') + '-' + CONCAT(@RANDPos,'') + '-' + CONCAT(CEILING(RAND() * 99999),'')
 
         INSERT INTO tblJob
-            (JobTitle, JobTypeID, LevelID, EmployerID, Salary, NumberOfApplicants, PositionID)
+            (JobTitle, JobTypeID, LevelID, EmployerID, Salary, PositionID)
         VALUES
-            (@Title, @RANDType, @RANDLev, @RANDEmpID, @RANDSal, @RANDNumApp, @RANDPos)
+            (@Title, @RANDType, @RANDLev, @RANDEmpID, @RANDSal, @RANDPos)
 		SET @RUN = @RUN - 1
 	END
 GO
